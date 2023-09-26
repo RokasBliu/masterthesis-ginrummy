@@ -1,9 +1,15 @@
+from Hand import Hand
+
 class Player(object):
     def __init__(self, name):
         self.name = name
-        self.hand = []
+        self.hand = Hand()
         self.score = 0
         self.isHuman = True
+        self.player_knock = False
+        self.player_draw = True # True when it is player's turn to draw; False when it is not
+        self.player_discard = False # True when it is player's turn to discard; False when it is not
+        self.in_play = False
 
     def __repr__(self):
-        return f"{self.name} has a score of {self.score}"
+        return f"{self.name} has a score of {self.score}, with a hand of {self.hand}"

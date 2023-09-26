@@ -5,6 +5,7 @@ class Card(object):
             self.suit = suit
             self.value = value
             self.hidden = True
+            self.meld_amount = 0
 
         def __repr__(self):
             return f"{self.value} of {self.suit}"
@@ -13,9 +14,10 @@ class Card(object):
             return self.value == other.value and self.suit == other.suit
 
 class Deck(list):
+
         def __init__(self):
             self.suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
-            self.values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+            self.values = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
             for suit in self.suits:
                 for value in self.values:
                     self.append(Card(suit, value))
@@ -28,7 +30,7 @@ class Deck(list):
 
         def make_smaller_deck(self): # For easier computations
             self.clear()
-            self.values = ['6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+            self.values = ['5','6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
             for suit in self.suits:
                 for value in self.values:
                     self.append(Card(suit, value))
