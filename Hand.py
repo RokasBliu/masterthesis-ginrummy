@@ -38,6 +38,8 @@ class Hand(object):
         self.deadwood = 0
         self.melds = []
         self.sort_by_rank()
+
+        #Check for equal cards
         for i in range(len(self.cards)):
             equal_cards = [self.cards[i]]
             for j in range(i+1, len(self.cards)):
@@ -48,6 +50,21 @@ class Hand(object):
             if len(equal_cards) >= 3:
                 self.melds.append(equal_cards)
         
+        #Check for straights
+        for i in range(len(self.cards)):
+            straight = [self.cards[i]]
+            straight_values = [self.rank_converter[self.cards[i].value]]
+            for j in range(i+1, len(self.cards)):
+                if self.rank_converter[self.cards[i].value] == self.rank_converter[self.cards[j].value] - 1:
+                    straight.append(self.cards[j])
+                    straight_values.append(self.rank_converter[self.cards[j].value])
+                    i = j
+                else:
+                    break
+            if len(straight) >= 4:
+                self.melds.append(straight)
+
+
         if len(self.melds) == 0:
             for c in self.cards:
                 self.deadwood += self.card_values[c.value]
