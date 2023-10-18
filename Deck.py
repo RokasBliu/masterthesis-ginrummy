@@ -5,7 +5,7 @@ class Card(object):
             self.suit = suit
             self.value = value
             self.hidden = True
-            self.meld_amount = 0
+            self.meld_ids = []
 
         def __repr__(self):
             return f"{self.value} of {self.suit}"

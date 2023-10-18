@@ -49,28 +49,38 @@ class Hand(object):
                     break
             if len(equal_cards) >= 3:
                 self.melds.append(equal_cards)
+                for c in equal_cards:
+                        c.meld_ids.append(len(self.melds))
         
         #Check for straights
         for i in range(len(self.cards)):
-            straight = [self.cards[i]]
+            k = i
+            straight_suits = [self.cards[i]]
             straight_values = [self.rank_converter[self.cards[i].value]]
             for j in range(i+1, len(self.cards)):
-                if self.rank_converter[self.cards[i].value] == self.rank_converter[self.cards[j].value] - 1:
-                    straight.append(self.cards[j])
-                    straight_values.append(self.rank_converter[self.cards[j].value])
-                    i = j
+                if self.rank_converter[self.cards[k].value] == self.rank_converter[self.cards[j].value] - 1:
+                    if self.cards[k].suit == self.cards[j].suit:
+                        straight_suits.append(self.cards[j])
+                        straight_values.append(self.rank_converter[self.cards[j].value])
+                        k = j
+                    print("Straight values: ", straight_suits)
+                    if len(straight_suits) >= 3:
+                        self.melds.append(straight_suits)
+                        for c in straight_suits:
+                            c.meld_ids.append(len(self.melds))
+
+                elif self.rank_converter[self.cards[k].value] == self.rank_converter[self.cards[j].value]:
+                    continue
                 else:
                     break
-            if len(straight) >= 4:
-                self.melds.append(straight)
 
-
-        if len(self.melds) == 0:
-            for c in self.cards:
-                self.deadwood += self.card_values[c.value]
+        best_meld = self.find_best_meld()            
+        
+        if best_meld == None:
+            self.deadwood = 0
         else:
-            for c in self.cards:
-                if c not in self.flatten(self.melds):
+            for c in best_meld:
+                if c not in best_meld:
                     self.deadwood += self.card_values[c.value]
 
         print("Cards", self.cards)
@@ -79,6 +89,26 @@ class Hand(object):
         
         return self.deadwood
                 
+    def find_best_meld(self):
+
+        meld_conflict = False
+        if len(self.melds) == 0:
+            return None
+        
+        if len(self.melds) == 1:
+            return self.melds[0]
+
+        for c in self.flatten(self.melds):
+            if len(c.meld_ids) > 1:
+                meld_conflict = True
+                break
+
+        if meld_conflict == False:
+            return self.flatten(self.melds)        
+        
+        return self.melds
+
+            
 
 
             
