@@ -130,13 +130,17 @@ class Hand(object):
             #Check if melds can be combined
             for i in range(len(self.melds)):
                 for j in range(i+1, len(self.melds)):
-
+                    can_combine = True
                     ##Check for conflict
                     for c in self.melds[i]:
                         if c in self.melds[j]:
-                            continue
-                        else:
-                            self.melds.append(self.melds[i] + self.melds[j])
+                            can_combine = False
+                            break
+                    
+                    if can_combine == True:
+                        self.melds.append(self.melds[i] + self.melds[j])
+                    
+                            
 
 
             for i in range(len(self.melds)):
