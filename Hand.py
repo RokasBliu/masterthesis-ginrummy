@@ -37,6 +37,11 @@ class Hand(object):
     def get_hand_score(self):
         self.deadwood = 0
         self.melds = []
+
+        #Reset meld_ids
+        for c in self.cards:
+            c.meld_ids = []
+
         self.sort_by_rank()
 
         #Check for equal cards
@@ -50,9 +55,10 @@ class Hand(object):
             if len(equal_cards) >= 3:
                 self.melds.append(equal_cards)
                 for c in equal_cards:
-                        c.meld_ids.append(len(self.melds))
+                    c.meld_ids.append(len(self.melds))
         
         #Check for straights
+        ##TODO: Sjekk om denne faktisk funker
         for i in range(len(self.cards)):
             k = i
             straight_suits = [self.cards[i]]
@@ -63,11 +69,14 @@ class Hand(object):
                         straight_suits.append(self.cards[j])
                         straight_values.append(self.rank_converter[self.cards[j].value])
                         k = j
-                    print("Straight values: ", straight_suits)
-                    if len(straight_suits) >= 3:
-                        self.melds.append(straight_suits)
-                        for c in straight_suits:
-                            c.meld_ids.append(len(self.melds))
+                        print("Straight values: ", straight_suits)
+                        if len(straight_suits) >= 3:
+                            for c in straight_suits:
+                                c.meld_ids.append(len(self.melds))
+
+                            self.melds.append(straight_suits[:])
+                            
+                                
 
                 elif self.rank_converter[self.cards[k].value] == self.rank_converter[self.cards[j].value]:
                     continue
@@ -77,15 +86,18 @@ class Hand(object):
         best_meld = self.find_best_meld()            
         
         if best_meld == None:
-            self.deadwood = 0
+            for c in self.cards:
+                self.deadwood += self.card_values[c.value]
+
         else:
-            for c in best_meld:
+            for c in self.cards:
                 if c not in best_meld:
                     self.deadwood += self.card_values[c.value]
 
         print("Cards", self.cards)
         print("Melds", self.melds)
-        print(self.deadwood)
+        print("Best meld", best_meld)
+        print("Deadwood:", self.deadwood)
         
         return self.deadwood
                 
@@ -98,15 +110,49 @@ class Hand(object):
         if len(self.melds) == 1:
             return self.melds[0]
 
+        #TODO: Work in progress
         for c in self.flatten(self.melds):
             if len(c.meld_ids) > 1:
                 meld_conflict = True
+                print("Meld conflict")
                 break
 
         if meld_conflict == False:
             return self.flatten(self.melds)        
-        
-        return self.melds
+        else:
+
+            best_meld = self.melds[0]
+            best_meld_deadwood = 0
+            for c in self.cards:
+                if c not in best_meld:
+                    best_meld_deadwood += self.card_values[c.value]
+
+            #Check if melds can be combined
+            for i in range(len(self.melds)):
+                for j in range(i+1, len(self.melds)):
+
+                    ##Check for conflict
+                    for c in self.melds[i]:
+                        if c in self.melds[j]:
+                            continue
+                        else:
+                            self.melds.append(self.melds[i] + self.melds[j])
+
+
+            for i in range(len(self.melds)):
+
+                meld_i_deadwood = 0
+                print(best_meld)
+
+                for c in self.cards:
+                    if c not in self.melds[i]:
+                        meld_i_deadwood += self.card_values[c.value]
+
+                if meld_i_deadwood < best_meld_deadwood:
+                    best_meld = self.melds[i]
+
+
+        return best_meld
 
             
 
