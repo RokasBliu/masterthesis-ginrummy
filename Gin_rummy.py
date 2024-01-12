@@ -16,6 +16,9 @@ class Gin_rummy(object):
         self.deck = []
         self.discard_pile = []
 
+        self.GIN_POINTS = 25
+        self.UNDERCUT_POINTS = 10
+        self.WINNING_SCORE = 100
 
     def start_new_game(self):
         if self.game_over:
@@ -72,7 +75,7 @@ class Gin_rummy(object):
             knock_answer = input("Do you want to knock? (y/n)")
 
             if knock_answer.lower() == "y":
-                self.end_round(player)
+                self.knock(player)
             else:
                 player.player_knock = False
                 player.player_discard = False
@@ -81,19 +84,32 @@ class Gin_rummy(object):
         self.turn_index = (self.turn_index + 1) % 2
 
 
-    def end_round(self, player):
+    def knock(self, player):
         self.round_number += 1
         self.decline_round = False
         self.game_over = True
         self.strike_one = False
         self.short_of_card = False
+        other_player = self.players[(self.turn_index + 1) % 2]
+
+        print("------------------")
+        print("Knocking player's hand score: ", player.hand.deadwood)
+        print("Other player's hand score: ", other_player.hand.deadwood)
+        print("------------------")
 
         if player.hand.deadwood == 0:
-            player.score += 25
-        else:
-            player.score += player.hand.deadwood
+            player.score += self.GIN_POINTS
+        elif player.hand.deadwood < other_player.hand.deadwood:
+            player.score += other_player.hand.deadwood - player.hand.deadwood
+        else: # player.hand.deadwood > other_player.hand.deadwood
+            other_player.score += player.hand.deadwood - other_player.hand.deadwood + self.UNDERCUT_POINTS
 
-        if player.score >= 100:
+
+
+        print("Player 1's score: ", self.players[0].score)
+        print("Player 2's score: ", self.players[1].score)
+
+        if player.score >= self.WINNING_SCORE:
             self.game_over = True
             print(f"{player.name} won the game!")
         else:
@@ -115,7 +131,9 @@ class Gin_rummy(object):
 
     def game_flow(self):
         self.start_new_game()
+        print("------------------")
         print("Game started")
+        print("------------------")
         while self.game_over == False:
             print("Round number: ", self.round_number)
             print(self.players[self.turn_index].name, "'s turn")

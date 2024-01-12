@@ -45,6 +45,7 @@ class Hand(object):
         self.sort_by_rank()
 
         #Check for equal cards
+        #TODO: må lagre alle permutations av melds
         for i in range(len(self.cards)):
             equal_cards = [self.cards[i]]
             for j in range(i+1, len(self.cards)):
@@ -53,12 +54,19 @@ class Hand(object):
                 else:
                     break
             if len(equal_cards) >= 3:
-                self.melds.append(equal_cards)
-                for c in equal_cards:
-                    c.meld_ids.append(len(self.melds))
-        
+                if len(equal_cards) == 3:
+                    self.melds.append(equal_cards)
+                    for c in equal_cards:
+                        c.meld_ids.append(len(self.melds))
+
+                elif len(equal_cards) == 4:
+                    self.melds.append(equal_cards[1:])
+                    self.melds.append(equal_cards[0] + equal_cards[2:])
+                    self.melds.append(equal_cards[0:1] + equal_cards[3])
+
         #Check for straights
         ##TODO: Sjekk om denne faktisk funker
+        ##Etter litt testing ser det ut som den funker
         for i in range(len(self.cards)):
             k = i
             straight_suits = [self.cards[i]]
@@ -110,7 +118,6 @@ class Hand(object):
         if len(self.melds) == 1:
             return self.melds[0]
 
-        #TODO: Work in progress
         for c in self.flatten(self.melds):
             if len(c.meld_ids) > 1:
                 meld_conflict = True
