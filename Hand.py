@@ -38,6 +38,7 @@ class Hand(object):
     def get_hand_score(self):
         self.deadwood = 0
         self.melds = []
+        self.meld_id_counter = 0
 
         #Reset meld_ids
         for c in self.cards:
@@ -101,9 +102,10 @@ class Hand(object):
                         k = j
                         if len(straight_suits) >= 3:
                             for c in straight_suits:
-                                c.meld_ids.append(len(self.melds))
+                                c.meld_ids.append(self.meld_id_counter)
 
                             self.melds.append(straight_suits[:])
+                            self.meld_id_counter += 1
                             
                                 
 
