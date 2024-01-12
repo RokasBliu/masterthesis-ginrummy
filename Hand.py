@@ -128,7 +128,7 @@ class Hand(object):
         for m in self.melds:
             print("Meld: ", m)
         print("------------------")
-        #print("Best meld", best_meld)
+        print("Best meld", best_meld)
         print("Deadwood:", self.deadwood)
         
         return self.deadwood
@@ -190,6 +190,7 @@ class Hand(object):
                 print("------------------")
                 if meld_i_deadwood < best_meld_deadwood:
                     best_meld = self.melds[i]
+                    best_meld_deadwood = meld_i_deadwood
 
 
         return best_meld
