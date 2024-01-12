@@ -2,6 +2,7 @@ class Hand(object):
     def __init__(self):
         self.cards = []
         self.melds = []
+        self.meld_id_counter = 0
         self.deadwood = 0
         self.rank_converter = {'Ace': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
                    'Jack': 11, 'Queen': 12, 'King': 13}
@@ -57,12 +58,33 @@ class Hand(object):
                 if len(equal_cards) == 3:
                     self.melds.append(equal_cards)
                     for c in equal_cards:
-                        c.meld_ids.append(len(self.melds))
+                        c.meld_ids.append(self.meld_id_counter)
+                    self.meld_id_counter += 1
 
                 elif len(equal_cards) == 4:
+                    for c in equal_cards:
+                        c.meld_ids.append(self.meld_id_counter)   
+                    self.melds.append(equal_cards)
+                    self.meld_id_counter += 1
+
+                    for c in equal_cards[1:]:
+                        c.meld_ids.append(self.meld_id_counter)
                     self.melds.append(equal_cards[1:])
-                    self.melds.append(equal_cards[0] + equal_cards[2:])
-                    self.melds.append(equal_cards[0:1] + equal_cards[3])
+                    self.meld_id_counter += 1
+
+                    temp = equal_cards[:1] + equal_cards[2:]
+                    for c in temp:
+                        c.meld_ids.append(self.meld_id_counter)
+                    self.melds.append(temp)
+                    self.meld_id_counter += 1
+
+                    temp = equal_cards[:2] + equal_cards[3:]
+                    for c in temp:
+                        c.meld_ids.append(self.meld_id_counter)
+                    self.melds.append(temp)
+                    self.meld_id_counter += 1            
+
+                    
 
         #Check for straights
         ##TODO: Sjekk om denne faktisk funker
@@ -77,7 +99,6 @@ class Hand(object):
                         straight_suits.append(self.cards[j])
                         straight_values.append(self.rank_converter[self.cards[j].value])
                         k = j
-                        print("Straight values: ", straight_suits)
                         if len(straight_suits) >= 3:
                             for c in straight_suits:
                                 c.meld_ids.append(len(self.melds))
@@ -103,8 +124,11 @@ class Hand(object):
                     self.deadwood += self.card_values[c.value]
 
         print("Cards", self.cards)
-        print("Melds", self.melds)
-        print("Best meld", best_meld)
+        #print melds in a nice way
+        for m in self.melds:
+            print("Meld: ", m)
+        print("------------------")
+        #print("Best meld", best_meld)
         print("Deadwood:", self.deadwood)
         
         return self.deadwood
@@ -153,12 +177,17 @@ class Hand(object):
             for i in range(len(self.melds)):
 
                 meld_i_deadwood = 0
-                print(best_meld)
+
+                print("------------------")
+                print("Meld", self.melds[i])
 
                 for c in self.cards:
                     if c not in self.melds[i]:
                         meld_i_deadwood += self.card_values[c.value]
 
+                print("Meld deadwood", meld_i_deadwood)
+                print("Best meld deadwood", best_meld_deadwood)
+                print("------------------")
                 if meld_i_deadwood < best_meld_deadwood:
                     best_meld = self.melds[i]
 
