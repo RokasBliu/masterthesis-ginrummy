@@ -1,9 +1,11 @@
 import random
+import pygame
 
 class Card(object):
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
+            self.image = pygame.image.load('images/' + str(self.value) + '_of_' + self.suit + '.svg')
             self.hidden = True
             self.meld_ids = []
 

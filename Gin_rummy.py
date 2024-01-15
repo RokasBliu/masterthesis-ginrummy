@@ -1,6 +1,8 @@
 from  Deck import Deck
 from Player import Player
 from Hand import Hand
+import pygame
+
 class Gin_rummy(object):
     def __init__(self, player1, player2):
         self.players = [player1, player2]
@@ -129,28 +131,51 @@ class Gin_rummy(object):
             self.deal()
             self.discard_pile.append(self.deck.deal())
 
-    def game_flow(self):
+    def render(self, window):
+        window.fill((15, 0, 169))
+        font = pygame.font.SysFont('comicsans', 60, True)
+
+        i = 1
+        for card in self.players[0].hand.cards:
+            window.blit(card.image, (100 * i, 50))
+            i += 1 
+
+    def game_flow(self, window):
         self.start_new_game()
         print("------------------")
         print("Game started")
         print("------------------")
+
         while self.game_over == False:
+            self.key = None
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+                if event.type == pygame.KEYDOWN:
+                    key = event.key
+
             print("Round number: ", self.round_number)
             print(self.players[self.turn_index].name, "'s turn")
-            self.draw(self.players[self.turn_index])
-            self.discard(self.players[self.turn_index])
-            print("Next turn")
+            #self.draw(self.players[self.turn_index])
+            #self.discard(self.players[self.turn_index])
 
-        
+            self.render(window)
+            pygame.display.update()
+
+            print("Next turn")
 
 
 def main():
-        
+    pygame.init()
+    bounds = (1024, 768)
+    window = pygame.display.set_mode(bounds)
+    pygame.display.set_caption("Gin Rummy boiiiiiiiiiiiiiiiii")    
+    
     player1 = Player("Player 1")
     player2 = Player("Player 2")
 
     game = Gin_rummy(player1, player2)
-    game.game_flow()
+    game.game_flow(window)
 
 if __name__ == "__main__":
     main()
