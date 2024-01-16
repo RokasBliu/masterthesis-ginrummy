@@ -82,6 +82,8 @@ class Gin_rummy(object):
                 player.player_draw = True
 
         self.turn_index = (self.turn_index + 1) % 2
+        if self.turn_index == 0:
+            self.round_number += 1
 
 
     def knock(self, player):

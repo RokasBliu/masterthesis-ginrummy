@@ -125,13 +125,13 @@ class Hand(object):
                 if c not in best_meld:
                     self.deadwood += self.card_values[c.value]
 
-        print("Cards", self.cards)
+        #print("Cards", self.cards)
         #print melds in a nice way
-        for m in self.melds:
-            print("Meld: ", m)
-        print("------------------")
-        print("Best meld", best_meld)
-        print("Deadwood:", self.deadwood)
+        #for m in self.melds:
+            #print("Meld: ", m)
+        #print("------------------")
+        #print("Best meld", best_meld)
+        #print("Deadwood:", self.deadwood)
         
         return self.deadwood
                 
@@ -147,7 +147,7 @@ class Hand(object):
         for c in self.flatten(self.melds):
             if len(c.meld_ids) > 1:
                 meld_conflict = True
-                print("Meld conflict")
+                #print("Meld conflict")
                 break
 
         if meld_conflict == False:
@@ -180,16 +180,16 @@ class Hand(object):
 
                 meld_i_deadwood = 0
 
-                print("------------------")
-                print("Meld", self.melds[i])
+                #print("------------------")
+                #print("Meld", self.melds[i])
 
                 for c in self.cards:
                     if c not in self.melds[i]:
                         meld_i_deadwood += self.card_values[c.value]
 
-                print("Meld deadwood", meld_i_deadwood)
-                print("Best meld deadwood", best_meld_deadwood)
-                print("------------------")
+                #print("Meld deadwood", meld_i_deadwood)
+                #print("Best meld deadwood", best_meld_deadwood)
+                #print("------------------")
                 if meld_i_deadwood < best_meld_deadwood:
                     best_meld = self.melds[i]
                     best_meld_deadwood = meld_i_deadwood
