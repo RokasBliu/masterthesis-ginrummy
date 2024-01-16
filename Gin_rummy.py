@@ -1,7 +1,8 @@
-from  Deck import Deck
+from Deck import Deck
 from Player import Player
 from Hand import Hand
-class Gin_rummy(object):
+
+class Gin_Rummy(object):
     def __init__(self, player1, player2):
         self.players = [player1, player2]
         self.turn_index = 0 # 0 for player1, 1 for player2
@@ -20,10 +21,11 @@ class Gin_rummy(object):
         self.UNDERCUT_POINTS = 10
         self.WINNING_SCORE = 100
 
-    def start_new_game(self):
+    def start_new_game(self, with_smaller_deck):
         if self.game_over:
             self.deck = Deck()
-            self.deck.make_smaller_deck()
+            if with_smaller_deck:
+                self.deck.make_smaller_deck()
             self.deck.shuffle()
             self.game_over = False
             self.strike_one = False
@@ -36,12 +38,15 @@ class Gin_rummy(object):
                 p.hand = Hand()
             
             self.round_number = 0
-            self.deal()
+            self.deal(with_smaller_deck)
             self.discard_pile.append(self.deck.deal())
         
 
-    def deal(self):
-        for i in range(7):
+    def deal(self, with_smaller_deck):
+        num_cards = 10
+        if with_smaller_deck:
+            num_cards = 7
+        for i in range(num_cards):
             for p in self.players:
                 p.hand.add(self.deck.deal())
 
@@ -51,7 +56,6 @@ class Gin_rummy(object):
             print("Your hand: ", player.hand.sort_by_rank())
             print("Top of discard pile: ", self.discard_pile[-1])
             answer = input("Draw random or from discard?")
-
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
         if answer.lower() == "random":
@@ -64,7 +68,16 @@ class Gin_rummy(object):
 
     def discard(self, player):
         print("Your hand: ", player.hand.sort_by_rank())
-        answer = input("Which card do you want to discard? (1-11)")
+        check_if_int = False
+        while check_if_int == False:
+            answer = input("Which card do you want to discard? (1-11)")
+            check_if_int = True
+            try:
+                int(answer)
+            except ValueError:
+                check_if_int = False
+
+        
         card = player.hand.cards[int(answer)-1]
         player.hand.cards.remove(card)
         self.discard_pile.append(card)
@@ -99,12 +112,13 @@ class Gin_rummy(object):
         print("Other player's hand score: ", other_player.hand.deadwood)
         print("------------------")
 
-        if player.hand.deadwood == 0:
-            player.score += self.GIN_POINTS
-        elif player.hand.deadwood < other_player.hand.deadwood:
+        if player.hand.deadwood < other_player.hand.deadwood:
             player.score += other_player.hand.deadwood - player.hand.deadwood
         else: # player.hand.deadwood > other_player.hand.deadwood
             other_player.score += player.hand.deadwood - other_player.hand.deadwood + self.UNDERCUT_POINTS
+
+        if player.hand.deadwood == 0:
+            player.score += self.GIN_POINTS
 
 
 
@@ -119,20 +133,23 @@ class Gin_rummy(object):
             self.strike_one = False
             self.short_of_card = False
 
-            for p in self.players:
-                p.hand = Hand()
-                p.player_draw = False
-                p.player_discard = False
-                p.player_knock = False
+            self.start_new_round()
 
-            self.deck = Deck()
-            self.deck.make_smaller_deck()
-            self.deck.shuffle()
-            self.deal()
-            self.discard_pile.append(self.deck.deal())
+    def start_new_round():
+        for p in self.players:
+            p.hand = Hand()
+            p.player_draw = False
+            p.player_discard = False
+            p.player_knock = False
+
+        self.deck = Deck()
+        self.deck.make_smaller_deck()
+        self.deck.shuffle()
+        self.deal()
+        self.discard_pile.append(self.deck.deal())
 
     def game_flow(self):
-        self.start_new_game()
+        self.start_new_game(True)
         print("------------------")
         print("Game started")
         print("------------------")
@@ -141,9 +158,13 @@ class Gin_rummy(object):
             print(self.players[self.turn_index].name, "'s turn")
             self.draw(self.players[self.turn_index])
             self.discard(self.players[self.turn_index])
-            print("Next turn")
 
-        
+            # Check if the deck has only 2 cards left, in which case, the game ends in a draw
+            if len(self.deck) <= 2:
+                self.game_over = False
+                start_new_round()
+
+            print("Next turn")
 
 
 def main():
@@ -151,7 +172,7 @@ def main():
     player1 = Player("Player 1")
     player2 = Player("Player 2")
 
-    game = Gin_rummy(player1, player2)
+    game = Gin_Rummy(player1, player2)
     game.game_flow()
 
 if __name__ == "__main__":
