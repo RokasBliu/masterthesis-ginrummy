@@ -133,7 +133,7 @@ class Gin_Rummy(object):
 
             self.start_new_round()
 
-    def start_new_round():
+    def start_new_round(self):
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
@@ -160,7 +160,7 @@ class Gin_Rummy(object):
             # Check if the deck has only 2 cards left, in which case, the game ends in a draw
             if len(self.deck) <= 2:
                 self.game_over = False
-                start_new_round()
+                self.start_new_round()
 
             print("Next turn")
 
