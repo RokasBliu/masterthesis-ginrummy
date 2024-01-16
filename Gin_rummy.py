@@ -1,7 +1,8 @@
-from  Deck import Deck
+from Deck import Deck
 from Player import Player
 from Hand import Hand
-class Gin_rummy(object):
+
+class Gin_Rummy(object):
     def __init__(self, player1, player2):
         self.players = [player1, player2]
         self.turn_index = 0 # 0 for player1, 1 for player2
@@ -20,10 +21,11 @@ class Gin_rummy(object):
         self.UNDERCUT_POINTS = 10
         self.WINNING_SCORE = 100
 
-    def start_new_game(self):
+    def start_new_game(self, with_smaller_deck):
         if self.game_over:
             self.deck = Deck()
-            self.deck.make_smaller_deck()
+            if with_smaller_deck:
+                self.deck.make_smaller_deck()
             self.deck.shuffle()
             self.game_over = False
             self.strike_one = False
@@ -36,12 +38,15 @@ class Gin_rummy(object):
                 p.hand = Hand()
             
             self.round_number = 0
-            self.deal()
+            self.deal(with_smaller_deck)
             self.discard_pile.append(self.deck.deal())
         
 
-    def deal(self):
-        for i in range(7):
+    def deal(self, with_smaller_deck):
+        num_cards = 10
+        if with_smaller_deck:
+            num_cards = 7
+        for i in range(num_cards):
             for p in self.players:
                 p.hand.add(self.deck.deal())
 
@@ -130,7 +135,7 @@ class Gin_rummy(object):
             self.discard_pile.append(self.deck.deal())
 
     def game_flow(self):
-        self.start_new_game()
+        self.start_new_game(True)
         print("------------------")
         print("Game started")
         print("------------------")
@@ -149,7 +154,7 @@ def main():
     player1 = Player("Player 1")
     player2 = Player("Player 2")
 
-    game = Gin_rummy(player1, player2)
+    game = Gin_Rummy(player1, player2)
     game.game_flow()
 
 if __name__ == "__main__":
