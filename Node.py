@@ -55,6 +55,23 @@ class Node:
                 child.game_state.print_state()
                 print("Depth: ", child.depth)
 
+        elif self.game_state.state == "knock":
+            #Can either knock or not knock
+            new_state = copy.deepcopy(self.game_state)
+            child = Node(new_state, self)
+            child.game_state.knock()
+            self.children.append(child)
+            child.game_state.print_state()
+            print("Depth: ", child.depth)
+
+            if self.game_state.main_player_deadwood > 0:
+                new_state = copy.deepcopy(self.game_state)
+                child = Node(new_state, self)
+                child.game_state.state = "draw"
+        
+        elif self.game_state.state == "end_game":
+            return
+
     def create_children_tree(self, node, depth, hand_size):
         if depth == 0:
             return
@@ -71,7 +88,7 @@ def main():
     game.start_new_game()
     start_state = Game_State(game, "draw")
     root = Node(start_state)
-    root.create_children_tree(root, 2, 7)
+    root.create_children_tree(root, 5, 7)
         
 if __name__ == "__main__":
         main()
