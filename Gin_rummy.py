@@ -21,7 +21,7 @@ class Gin_Rummy(object):
         self.UNDERCUT_POINTS = 10
         self.WINNING_SCORE = 100
 
-    def start_new_game(self, with_smaller_deck):
+    def start_new_game(self, with_smaller_deck=True):
         if self.game_over:
             self.deck = Deck()
             if with_smaller_deck:
@@ -42,7 +42,7 @@ class Gin_Rummy(object):
             self.discard_pile.append(self.deck.deal())
         
 
-    def deal(self, with_smaller_deck):
+    def deal(self, with_smaller_deck=True):
         num_cards = 10
         if with_smaller_deck:
             num_cards = 7
@@ -135,7 +135,7 @@ class Gin_Rummy(object):
 
             self.start_new_round()
 
-    def start_new_round():
+    def start_new_round(self):
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
@@ -162,7 +162,7 @@ class Gin_Rummy(object):
             # Check if the deck has only 2 cards left, in which case, the game ends in a draw
             if len(self.deck) <= 2:
                 self.game_over = False
-                start_new_round()
+                self.start_new_round()
 
             print("Next turn")
 
