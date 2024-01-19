@@ -1,4 +1,5 @@
 import copy
+from Action import Action
 from Deck import Deck
 from Game_State import Game_State
 from Gin_Rummy import Gin_Rummy
@@ -10,12 +11,13 @@ class Node:
         self.game_state = game_state
         self.parent = parent
         self.children = []
+        self.action = None
         self.depth = 0
         if parent != None:
             self.depth = parent.depth + 1
 
         
-    def create_children(self, hand_size):
+    def create_children(self):
         self.game_state.print_state()
         print("Depth: ", self.depth)
         if self.game_state.state == "draw":
@@ -32,7 +34,7 @@ class Node:
             deck.make_smaller_deck()
             for c in self.game_state.main_player_hand.cards:
                 deck.remove(c)
-            for c in self.game_state.known_cards:
+            for c in self.game_state.opponent_known_cards:
                 deck.remove(c)
             for c in self.game_state.discard_pile:
                 deck.remove(c)
@@ -40,7 +42,7 @@ class Node:
             for i in range(len(deck)):
                 new_state = copy.deepcopy(self.game_state)
                 child = Node(new_state, self)
-                child.game_state.draw_card(deck[i])
+                child.game_state.draw_card()
                 self.children.append(child)
                 child.game_state.print_state()
                 print("Depth: ", child.depth)
@@ -72,13 +74,13 @@ class Node:
         elif self.game_state.state == "end_game":
             return
 
-    def create_children_tree(self, node, depth, hand_size):
+    def create_children_tree(self, node, depth):
         if depth == 0:
             return
         else:
-            node.create_children(hand_size)
+            node.create_children()
             for c in node.children:
-                c.create_children_tree(c, depth - 1, hand_size)
+                c.create_children_tree(c, depth - 1)
 
 def main():
     player1 = Player("Player 1")
@@ -88,7 +90,7 @@ def main():
     game.start_new_game()
     start_state = Game_State(game, "draw")
     root = Node(start_state)
-    root.create_children_tree(root, 5, 7)
+    root.create_children_tree(root, 1)
         
 if __name__ == "__main__":
         main()
