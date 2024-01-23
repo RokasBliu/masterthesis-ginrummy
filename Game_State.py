@@ -1,5 +1,6 @@
 from Deck import Deck
 from Card import Card
+from Gin_Oracle import Gin_Oracle
 class Game_State(object):
     def __init__(self, game, state, opponent_known_cards=[]):
         self.main_player = game.players[game.turn_index]
@@ -22,6 +23,7 @@ class Game_State(object):
 
         self.opponent_known_cards = opponent_known_cards
         self.rand_card_dist = []
+        self.oracle = Gin_Oracle()
 
         #Calculate random cards available
         rand_deck = Deck()
@@ -78,11 +80,11 @@ class Game_State(object):
             if has_phantom:
                 print("Has phantom")
                 #TODO - Implement get expected value from hand with phantom cards
+                self.main_player_expected_utility = self.oracle.get_expected_utility(self.main_player_hand)
                     
             else:  
                 self.main_player_deadwood = self.main_player_hand.get_hand_score()
 
-            #self.main_player_expected_utility = self.oracle.get_expected_utility()
             self.state = "draw"
 
             #if self.main_player_expected_utility <= 10:
@@ -108,4 +110,5 @@ class Game_State(object):
         print("Main player: ", self.main_player.name)
         print("Main player's hand: ", self.main_player_hand)
         print("Main player's deadwood: ", self.main_player_deadwood)
+        print("Main player's expected utility: ", self.main_player_expected_utility)
         print("Discard pile: ", self.discard_pile)

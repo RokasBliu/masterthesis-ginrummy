@@ -90,7 +90,7 @@ def main():
     game.start_new_game()
     start_state = Game_State(game, "draw")
     root = Node(start_state)
-    root.create_children_tree(root, 1)
+    root.create_children_tree(root, 2)
         
 if __name__ == "__main__":
         main()
