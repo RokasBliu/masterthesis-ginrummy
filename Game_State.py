@@ -104,8 +104,7 @@ class Game_State(object):
             card.make_phantom_card(self.rand_card_dist)
             self.action = Action("Discard", card, "opponent")
 
-        if card is not None:
-            self.discard_pile.append(card)
+        self.discard_pile.append(card)
         
         self.state = "draw"
         self.turn_index = (self.turn_index + 1) % 2

@@ -51,13 +51,22 @@ class Node:
         
         elif self.game_state.state == "discard":
             #Make states for each card in hand
-            for c in self.game_state.main_player_hand.cards:
+            if self.game_state.main_player_index == self.game_state.turn_index:
+                for c in self.game_state.main_player_hand.cards:
+                    new_state = copy.deepcopy(self.game_state)
+                    child = Node(new_state, self)
+                    child.game_state.discard_from_hand(c)
+                    self.children.append(child)
+                    child.game_state.print_state()
+                    print("Depth: ", child.depth)
+            else:
                 new_state = copy.deepcopy(self.game_state)
                 child = Node(new_state, self)
-                child.game_state.discard_from_hand(c)
+                child.game_state.discard_from_hand()
                 self.children.append(child)
                 child.game_state.print_state()
                 print("Depth: ", child.depth)
+
 
         elif self.game_state.state == "knock":
             #Can either knock or not knock
@@ -92,7 +101,7 @@ def main():
     game.start_new_game()
     start_state = Game_State(game, "draw")
     root = Node(start_state)
-    root.create_children_tree(root, 5)
+    root.create_children_tree(root, 8)
         
 if __name__ == "__main__":
         main()
