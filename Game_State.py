@@ -116,8 +116,8 @@ class Game_State(object):
     
     def print_state(self):
         print("--------------------")
-        print("State: ", self.state)
-        print("Round number: ", self.round_number)
+        #print("State: ", self.state)
+        #print("Round number: ", self.round_number)
         print("Action done this turn: ", self.action)
         print("Main player's hand: ", self.main_player_hand)
         print("Main player's deadwood: ", self.main_player_deadwood)

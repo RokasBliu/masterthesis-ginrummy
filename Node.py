@@ -18,8 +18,8 @@ class Node:
 
         
     def create_children(self):
-        self.game_state.print_state()
-        print("Depth: ", self.depth)
+        #self.game_state.print_state()
+        #print("Depth: ", self.depth)
         if self.game_state.state == "draw":
             #Draw from discard pile
             new_state = copy.deepcopy(self.game_state)
@@ -101,7 +101,8 @@ def main():
     game.start_new_game()
     start_state = Game_State(game, "draw")
     root = Node(start_state)
-    root.create_children_tree(root, 8)
+    root.game_state.print_state()
+    root.create_children_tree(root, 4)
         
 if __name__ == "__main__":
         main()
