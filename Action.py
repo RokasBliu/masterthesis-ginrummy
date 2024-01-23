@@ -5,7 +5,6 @@ class Action:
         self.description = description
 
     def __str__(self):
-        return self.name
-
+        return f"{self.name}: {self.description} by {self.player}"
     def __repr__(self):
         return f"{self.name}: {self.description} by {self.player}"

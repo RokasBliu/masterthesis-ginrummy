@@ -43,7 +43,7 @@ class Gin_Oracle:
 
                     temp_hand = deepcopy(hand)
                     temp_hand.cards.append(deck[j])
-                    print("Temp hand: ", temp_hand)
+                    #print("Temp hand: ", temp_hand)
                     pc_utility += (phantom_cards[i].phantom_values[j] * temp_hand.get_hand_score())
                      
         return pc_utility

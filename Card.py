@@ -15,7 +15,7 @@ class Card(object):
 
         def __repr__(self):
             if self.isPhantom:
-                return f"Phantom Card: {self.phantom_values}"
+                return f"Phantom Card" #{self.phantom_values}
             return f"{self.value} of {self.suit}" #meld ids: {self.meld_ids}
         
         def __eq__(self, other):
