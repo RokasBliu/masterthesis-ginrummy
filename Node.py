@@ -13,6 +13,7 @@ class Node:
         self.children = []
         self.action = None
         self.depth = 0
+        self.children_count = 0
         if parent != None:
             self.depth = parent.depth + 1
 
@@ -90,6 +91,7 @@ class Node:
             return
         else:
             node.create_children()
+            self.children_count += len(node.children)
             for c in node.children:             
                 c.create_children_tree(c, depth - 1)
 
@@ -102,7 +104,7 @@ def main():
     start_state = Game_State(game, "draw")
     root = Node(start_state)
     root.game_state.print_state()
-    root.create_children_tree(root, 4)
+    root.create_children_tree(root, 10)
         
 if __name__ == "__main__":
         main()

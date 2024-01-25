@@ -2,6 +2,7 @@ from Deck import Deck
 from Card import Card
 from Gin_Oracle import Gin_Oracle
 from Action import Action
+import numpy as np
 class Game_State(object):
     def __init__(self, game, state, opponent_known_cards=[]):
         self.main_player = game.players[game.turn_index]
@@ -23,6 +24,7 @@ class Game_State(object):
         self.top_card_discard_pile = self.discard_pile[-1]
 
         self.opponent_known_cards = opponent_known_cards
+        self.opponent_category_dist = np.zeros(6) #TODO: Make this more accurate
         self.rand_card_dist = []
         self.oracle = Gin_Oracle()
         self.action = None
@@ -30,7 +32,6 @@ class Game_State(object):
         #Calculate random cards available
         rand_deck = Deck()
         rand_deck.make_smaller_deck()
-        print("Random deck: ", rand_deck)
         cards_available_counter = 0
         
         for i in range(len(rand_deck)):
@@ -51,10 +52,12 @@ class Game_State(object):
         if self.main_player_index == self.turn_index:
             self.main_player_hand.add(self.top_card_discard_pile)
             self.action = Action("Draw from discard pile", self.top_card_discard_pile, self.main_player.name)
-        else:
+            #If the card from the discard pile is a phantom card, we may not need to go further down the tree, because we will always rather draw from the random deck
+        else: 
+            #TODO Adjust "probability score" of opponent, because it did draw from the discard pile
+            self.opponent_category_dist = self.oracle.update_category_dist(self.opponent_known_cards, self.opponent_category_dist, True, self.top_card_discard_pile)
             self.opponent_known_cards.append(self.top_card_discard_pile)
             self.action = Action("Draw from discard pile", self.top_card_discard_pile, "opponent")
-            #TODO Adjust "probability score" of opponent, because it did draw from the discard pile
         
         self.discard_pile.pop()
         self.state = "discard"
@@ -88,11 +91,11 @@ class Game_State(object):
             
             if has_phantom:
                 #print("Has phantom")
-                #TODO - Implement get expected value from hand with phantom cards
                 self.main_player_expected_utility = self.oracle.get_expected_utility(self.main_player_hand)
                     
             else:  
                 self.main_player_deadwood = self.main_player_hand.get_hand_score()
+                self.main_player_expected_utility = self.main_player_deadwood
 
             self.action = Action("Discard", card, self.main_player.name)
 
@@ -105,6 +108,7 @@ class Game_State(object):
             self.action = Action("Discard", card, "opponent")
 
         self.discard_pile.append(card)
+        self.top_card_discard_pile = card
         
         self.state = "draw"
         self.turn_index = (self.turn_index + 1) % 2
@@ -122,4 +126,6 @@ class Game_State(object):
         print("Main player's hand: ", self.main_player_hand)
         print("Main player's deadwood: ", self.main_player_deadwood)
         print("Main player's expected utility: ", self.main_player_expected_utility)
-        print("Discard pile: ", self.discard_pile)
+        #print("Discard pile: ", self.discard_pile)
+        #print("Opponent category distribution: ", self.opponent_category_dist)
+        #print("Random card distribution: ", self.rand_card_dist)
