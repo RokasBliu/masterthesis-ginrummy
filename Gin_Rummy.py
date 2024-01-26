@@ -23,7 +23,13 @@ class Gin_Rummy(object):
         self.UNDERCUT_POINTS = 10
         self.WINNING_SCORE = 100
 
+        self.NORMAL_NUM_CARDS_PER_HAND = 10
+        self.SMALLER_NUM_CARDS_PER_HAND = 7
+
+        self.is_smaller_deck = False
+
     def start_new_game(self, with_smaller_deck=True):
+        self.is_smaller_deck = with_smaller_deck
         if self.game_over:
             self.deck = Deck()
             if with_smaller_deck:
@@ -45,9 +51,9 @@ class Gin_Rummy(object):
         
 
     def deal(self, with_smaller_deck=True):
-        num_cards = 10
+        num_cards = self.NORMAL_NUM_CARDS_PER_HAND
         if with_smaller_deck:
-            num_cards = 7
+            num_cards = self.SMALLER_NUM_CARDS_PER_HAND
         for i in range(num_cards):
             for p in self.players:
                 p.hand.add(self.deck.deal())
@@ -178,6 +184,8 @@ class Gin_Rummy(object):
 
 def pygame_display(game):
     pygame.init()
+    p1 = game.players[0]
+    p2 = game.players[1]
     bounds = (1280, 400)
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
     window.fill((30, 92, 58))
@@ -186,12 +194,41 @@ def pygame_display(game):
     FPS = 24
 
     def display_cards(game, window):
-        player1 = game.players[0]
-        player2 = game.players[1]
-        for card in player1.hand.cards:
-            image = card.image
-            image = pygame.transform.scale(image, (int(238*0.8), int(332*0.8)))
-            window.blit(image, (100, 100))
+        window_width, window_height = window.get_size()
+        screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
+        padding = 2
+
+        common_denomitator = (screen_width * screen_height) / (window_width * window_height)
+        card_back = pygame.image.load('images/back.svg')
+        card_image_width, card_image_height = card_back.get_size()
+        resized_card_width = card_image_width * 0.75 / common_denomitator
+        resized_card_height = card_image_height * 0.75 / common_denomitator
+        resized_card_back = pygame.transform.scale(card_back, (int(resized_card_width), int(resized_card_height)))
+
+        # Display deck
+        window.blit(resized_card_back, ((window_width - resized_card_width) / 2, (window_height - resized_card_height) / 2))
+
+        # Display discard pile
+        discard_pile_card = pygame.image.load('images/blank_card.svg')
+        if game.discard_pile:
+            discard_pile_card = game.discard_pile[-1].image
+            discard_pile_card = pygame.transform.scale(discard_pile_card, (int(resized_card_width), int(resized_card_height)))
+        window.blit(discard_pile_card, ((window_width - resized_card_width) / 2 - resized_card_width - padding, (window_height - resized_card_height) / 2))
+
+        # Display cards in hand
+        player_i = 1
+        for player in game.players:
+            card_i = 0
+            for card in player.hand.cards:
+                image = card.image
+                # resized_card_width = (window_width)/(if game.is_smaller_deck)-(window_width)/(len(player.hand.cards))/padding
+                # resized_card_height = card_image_height*(resized_card_width/image_width)
+                image = pygame.transform.scale(image, (int(resized_card_width), int(resized_card_height)))
+                window.blit(image, ((resized_card_width + padding) * card_i, (window_height - resized_card_height)*player_i))
+                card_i += 1
+            player_i -= 1
+        
+        
 
     def game_loop(game, window):
         while True:
@@ -205,10 +242,10 @@ def pygame_display(game):
                             sys.exit()
                     if event.type == pygame.VIDEORESIZE:
                         window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-                        window.fill((30, 92, 58))
+                    window.fill((30, 92, 58))
                     display_cards(game, window)
                     pygame.display.update()
-                    clock.tick(FPS)
+                    # clock.tick(FPS)
             except KeyboardInterrupt:
                 break
     
