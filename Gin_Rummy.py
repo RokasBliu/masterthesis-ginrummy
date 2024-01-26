@@ -78,7 +78,7 @@ class Gin_Rummy(object):
         print("Your hand: ", player.hand.sort_by_rank())
         check_if_int = False
         while check_if_int == False:
-            answer = input("Which card do you want to discard? (1-11)")
+            answer = input(f"Which card do you want to discard? (1-{self.SMALLER_NUM_CARDS_PER_HAND + 1 if self.is_smaller_deck else self.NORMAL_NUM_CARDS_PER_HAND + 1})")
             check_if_int = True
             try:
                 int(answer)
@@ -188,13 +188,15 @@ def pygame_display(game):
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
     pygame.display.set_caption("Gin Rummy boiiiiiiiiiiiiiiiii")
     clock = pygame.time.Clock()
-    FPS = 24
+    FPS = 12
 
     def display_cards(game, window):
+        # Define some useful variables
         window_width, window_height = window.get_size()
         screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
         padding = 2
 
+        # Load card back and use it to calculate the new image widths and heights
         common_denomitator = (screen_width * screen_height) / (window_width * window_height)
         card_back = pygame.image.load('images/back.svg')
         card_image_width, card_image_height = card_back.get_size()
@@ -218,17 +220,19 @@ def pygame_display(game):
             card_i = 0
             for card in player.hand.cards:
                 image = card.image
+                # If card isHidden, we want to not show it
                 if card.isHidden:
                     image = card_back
-                # resized_card_width = (window_width)/(if game.is_smaller_deck)-(window_width)/(len(player.hand.cards))/padding
-                # resized_card_height = card_image_height*(resized_card_width/image_width)
+                # Transform card's size
                 image = pygame.transform.scale(image, (int(resized_card_width), int(resized_card_height)))
+                # Render card on screen
                 window.blit(image, ((resized_card_width + padding) * card_i, (window_height - resized_card_height)*player_i))
                 card_i += 1
             player_i -= 1    
 
-    def game_loop(game, window):
+    def display_loop(game, window):
         while True:
+            # Handle interrupts, window resizes and "quit" events
             try:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -241,12 +245,14 @@ def pygame_display(game):
                         window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
             except KeyboardInterrupt:
                 break
+
+            # Rendering
             window.fill((30, 92, 58))
             display_cards(game, window)
             pygame.display.update()
             clock.tick(FPS)
     
-    game_loop(game, window)
+    display_loop(game, window)
     pygame.quit()
 
 def game_thread(game):
