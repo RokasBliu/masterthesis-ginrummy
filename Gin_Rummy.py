@@ -184,11 +184,8 @@ class Gin_Rummy(object):
 
 def pygame_display(game):
     pygame.init()
-    p1 = game.players[0]
-    p2 = game.players[1]
-    bounds = (1280, 400)
+    bounds = (1280, 600)
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
-    window.fill((30, 92, 58))
     pygame.display.set_caption("Gin Rummy boiiiiiiiiiiiiiiiii")
     clock = pygame.time.Clock()
     FPS = 24
@@ -221,14 +218,14 @@ def pygame_display(game):
             card_i = 0
             for card in player.hand.cards:
                 image = card.image
+                if card.isHidden:
+                    image = card_back
                 # resized_card_width = (window_width)/(if game.is_smaller_deck)-(window_width)/(len(player.hand.cards))/padding
                 # resized_card_height = card_image_height*(resized_card_width/image_width)
                 image = pygame.transform.scale(image, (int(resized_card_width), int(resized_card_height)))
                 window.blit(image, ((resized_card_width + padding) * card_i, (window_height - resized_card_height)*player_i))
                 card_i += 1
-            player_i -= 1
-        
-        
+            player_i -= 1    
 
     def game_loop(game, window):
         while True:
@@ -242,12 +239,12 @@ def pygame_display(game):
                             sys.exit()
                     if event.type == pygame.VIDEORESIZE:
                         window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-                    window.fill((30, 92, 58))
-                    display_cards(game, window)
-                    pygame.display.update()
-                    # clock.tick(FPS)
             except KeyboardInterrupt:
                 break
+            window.fill((30, 92, 58))
+            display_cards(game, window)
+            pygame.display.update()
+            clock.tick(FPS)
     
     game_loop(game, window)
     pygame.quit()
