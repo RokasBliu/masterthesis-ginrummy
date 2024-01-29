@@ -3,6 +3,7 @@ from Player import Player
 from Hand import Hand
 import threading
 import pygame
+import sys
 
 class Gin_Rummy(object):
     def __init__(self, player1, player2):
@@ -163,13 +164,6 @@ class Gin_Rummy(object):
         print("------------------")
 
         while self.game_over == False:
-            # self.key = None
-            # for event in pygame.event.get():
-            #     if event.type == pygame.QUIT:
-            #         self.game_over = True
-            #     if event.type == pygame.KEYDOWN:
-            #         key = event.key
-
             print("Round number: ", self.round_number)
             print(self.players[self.turn_index].name, "'s turn")
             self.draw(self.players[self.turn_index])
@@ -186,33 +180,44 @@ def pygame_display(game):
     pygame.init()
     bounds = (1280, 600)
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
-    pygame.display.set_caption("Gin Rummy boiiiiiiiiiiiiiiiii")
+    pygame.display.set_caption("Gin Rummy")
     clock = pygame.time.Clock()
     FPS = 12
 
+    # Init font
+    pygame.font.init()
+        
     def display_cards(game, window):
         # Define some useful variables
         window_width, window_height = window.get_size()
         screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
+        custom_border_width, custom_border_height = (window_width * 0.5, window_height * 0.7)
+        custom_window_placement = (window_width/2 - custom_border_width/2, window_height/2 - custom_border_height/2)
         padding = 2
 
+        # Draw window border
+        # pygame.draw.line(window, (40, 72, 68), custom_window_placement, (custom_window_placement[0], custom_window_placement[1] + custom_border_height), width=1)
+        # pygame.draw.line(window, (40, 72, 68), custom_window_placement, (custom_window_placement[0] + custom_border_width, custom_window_placement[1]), width=1)
+        # pygame.draw.line(window, (40, 72, 68), (custom_window_placement[0], custom_window_placement[1] + custom_border_height), (custom_window_placement[0] + custom_border_width, custom_window_placement[1] + custom_border_height), width=1)
+        # pygame.draw.line(window, (40, 72, 68), (custom_window_placement[0] + custom_border_width, custom_window_placement[1]), (custom_window_placement[0] + custom_border_width, custom_window_placement[1] + custom_border_height), width=1)
+
         # Load card back and use it to calculate the new image widths and heights
-        common_denomitator = (screen_width * screen_height) / (window_width * window_height)
+        #common_denominator = (screen_width * screen_height) / (window_width * window_height)
         card_back = pygame.image.load('images/back.svg')
         card_image_width, card_image_height = card_back.get_size()
-        resized_card_width = card_image_width * 0.75 / common_denomitator
-        resized_card_height = card_image_height * 0.75 / common_denomitator
+        resized_card_height = custom_border_height * 0.25
+        resized_card_width = card_image_width * (resized_card_height / card_image_height)
         resized_card_back = pygame.transform.scale(card_back, (int(resized_card_width), int(resized_card_height)))
 
         # Display deck
-        window.blit(resized_card_back, ((window_width - resized_card_width) / 2, (window_height - resized_card_height) / 2))
+        window.blit(resized_card_back, (custom_border_width / 2 + padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
 
         # Display discard pile
         discard_pile_card = pygame.image.load('images/blank_card.svg')
         if game.discard_pile:
             discard_pile_card = game.discard_pile[-1].image
             discard_pile_card = pygame.transform.scale(discard_pile_card, (int(resized_card_width), int(resized_card_height)))
-        window.blit(discard_pile_card, ((window_width - resized_card_width) / 2 - resized_card_width - padding, (window_height - resized_card_height) / 2))
+        window.blit(discard_pile_card, (custom_border_width / 2 - resized_card_width - padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
 
         # Display cards in hand
         player_i = 1
@@ -226,9 +231,27 @@ def pygame_display(game):
                 # Transform card's size
                 image = pygame.transform.scale(image, (int(resized_card_width), int(resized_card_height)))
                 # Render card on screen
-                window.blit(image, ((resized_card_width + padding) * card_i, (window_height - resized_card_height)*player_i))
+                window.blit(image,
+                 ((resized_card_width + padding) * card_i + (custom_border_width/2 - resized_card_width*(game.SMALLER_NUM_CARDS_PER_HAND / 2 if game.is_smaller_deck else game.NORMAL_NUM_CARDS_PER_HAND / 2) + custom_window_placement[0]),
+                 (custom_border_height - resized_card_height) * player_i + custom_window_placement[1]))
                 card_i += 1
-            player_i -= 1    
+            player_i -= 1
+
+        # Display player text
+        my_font = pygame.font.SysFont('Comic Sans MS', 30 // (screen_height // window_height))
+        player_1_text = my_font.render('Player 1', False, (0, 0, 0))
+        window.blit(player_1_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8))
+        player_2_text = my_font.render('Player 2', False, (0, 0, 0))
+        window.blit(player_2_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
+
+        # Display player turn
+        player_turn = game.turn_index
+        turn_state = "DRAW"
+        if len(game.players[player_turn].hand.cards) > game.SMALLER_NUM_CARDS_PER_HAND if game.is_smaller_deck else game.NORMAL_NUM_CARDS_PER_HAND:
+            turn_state = "DISCARD"
+        turn_text = my_font.render(turn_state, False, (0, 0, 0), (0,125,0) if turn_state == "DRAW" else (125,0,0))
+        turn_text_position = (custom_border_width - player_1_text.get_width() + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8) if player_turn == 0 else (custom_border_width - player_1_text.get_width() + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3)
+        window.blit(turn_text, turn_text_position)
 
     def display_loop(game, window):
         while True:
