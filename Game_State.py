@@ -59,9 +59,13 @@ class Game_State(object):
             self.opponent_category_dist = self.oracle.update_category_dist(self.opponent_known_cards, self.opponent_category_dist, True, self.top_card_discard_pile)
             self.opponent_known_cards.append(self.top_card_discard_pile)
             self.action = Action("Draw from discard pile", self.top_card_discard_pile, "opponent")
+            self.probability = self.probability/2
+            if self.top_card_discard_pile.isPhantom:
+                self.state = "end_game"
         
         self.discard_pile.pop()
-        self.state = "discard"
+        if self.state != "end_game":
+            self.state = "discard"
 
         
     def draw_card(self):
@@ -76,11 +80,12 @@ class Game_State(object):
         
         #TODO Adjust "probability score" of opponent, because it did not draw from the discard pile
         else:
-            print("Opponent drew from deck")
+            #print("Opponent drew from deck")
             self.action = Action("Draw from deck", new_card, "opponent")
-            print("Probability: ", self.probability)
+            #print("Probability: ", self.probability)
+            self.probability = self.probability/2
 
-        self.probability = self.probability/2
+        
         self.state = "discard"
     
     def discard_from_hand(self, card=None):
@@ -131,5 +136,6 @@ class Game_State(object):
         print("Main player's deadwood: ", self.main_player_deadwood)
         print("Main player's expected utility: ", self.main_player_expected_utility)
         print("Discard pile: ", self.discard_pile)
+        print("Known cards: ", self.opponent_known_cards)
         #print("Opponent category distribution: ", self.opponent_category_dist)
         #print("Random card distribution: ", self.rand_card_dist)

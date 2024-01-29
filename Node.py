@@ -25,8 +25,9 @@ class Node:
         if self.game_state.state == "draw":
             #Draw from discard pile          
             new_state = copy.deepcopy(self.game_state)
-            child = Node(new_state, self)
+            child = Node(new_state, self)                
             child.game_state.draw_from_discard_pile()
+
             self.children.append(child)
             #child.game_state.print_state()
             #print("Depth: ", child.depth)
@@ -43,7 +44,7 @@ class Node:
             # for c in self.game_state.discard_pile:
             #     if not c.isPhantom:
             #         deck.remove(c)
-            
+
             new_state = copy.deepcopy(self.game_state)
             child = Node(new_state, self)
             child.game_state.draw_card()

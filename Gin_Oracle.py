@@ -1,7 +1,10 @@
+import random
+from Gin_Rummy import Gin_Rummy
 from Hand import Hand
 from Deck import Deck
-from Card import Card
 from copy import deepcopy, copy
+
+from Player import Player
 class Gin_Oracle:
     def __init__(self):
         #Making for smaller deck for now
@@ -101,7 +104,7 @@ class Gin_Oracle:
                         category_dist[2] = 2
                         category_dist[4] = 1
 
-                    hasSequence = self.check_for_sequence(opponent_known_cards)
+                    #hasSequence = self.check_for_sequence(opponent_known_cards)
 
                 for c in opponent_known_cards:
                     #print("Card drawn: ", card_drawn.value, " Card in hand: ", c.value)
@@ -125,7 +128,7 @@ class Gin_Oracle:
 
     def check_for_meld_equal_cards(self, hand):
         #Check for equal cards
-        for i in len(hand):
+        for i in range(len(hand)):
             equal_cards = [hand[i]]
             for j in range(i+1, len(hand)):
                 if hand[i].value == hand[j].value:
@@ -137,7 +140,33 @@ class Gin_Oracle:
                 return True
         
         return False
-                    
-
 
         return category_dist
+    
+    def check_for_sequence(self, hand):
+        #TODO - implement
+        return False
+    
+    def create_random_game(self):
+        player1 = Player("Player 1")
+        player2 = Player("Player 2")
+        game = Gin_Rummy(player1, player2)
+        game.start_new_game()
+
+        rand_round_number = random.randint(1, 10)
+        rand_discard_number = random.randint(0, rand_round_number) - 1
+        rest_number = rand_round_number - rand_discard_number
+
+        for i in range(rand_discard_number):
+            game.discard_pile.append(game.deck.deal())
+        
+        known_cards = []
+        for i in range(rest_number):
+            known_cards.append(game.deck.deal())
+        
+        stages = ["draw", "discard"]
+        random_stage = stages[(random.randint(0, 1))]
+
+        return game, known_cards, random_stage
+
+    

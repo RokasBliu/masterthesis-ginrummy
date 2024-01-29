@@ -1,10 +1,8 @@
-from Deck import Deck
-from Gin_Rummy import Gin_Rummy
-from Node import Node
 from Game_State import Game_State
+from Gin_Oracle import Gin_Oracle
+from Node import Node
 import pandas as pd
 
-from Player import Player
 class Super_Simple_CFR:
     def __init__(self):
         self.strategies = None
@@ -45,10 +43,10 @@ class Super_Simple_CFR:
         #for i in range(iterations):
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
-        #print("Strategies: ", self.strategies)
+        print(self.strategies)
         best_strategy = self.strategies.idxmax(axis=1)
         
-        print("Best strategy: ", best_strategy[1])
+        print("Best strategy: ", best_strategy[0])
         return best_strategy, best_strategy
     
     def traverse(self, node, EndStage, EndDepth):
@@ -74,9 +72,7 @@ class Super_Simple_CFR:
                 for i in range(len(utilities)):
                     u = utilities[i] * states[i].game_state.probability
                     best_utility += u
-                    print("Probability: ", states[i].game_state.probability)
-                
-                print("Best utility: ", best_utility)
+                    
             return best_utility
         
         else:
@@ -105,25 +101,21 @@ class Super_Simple_CFR:
             exp_p2_utility_sum += exp_p2_utility_dist[i]
 
         tot_exp_utility = exp_p1_utility - exp_p2_utility_sum
-        print("Total expected utility: ", tot_exp_utility)
+        #print("Total expected utility: ", tot_exp_utility)
         return tot_exp_utility
 
 def main():
-    player1 = Player("Player 1")
-    player2 = Player("Player 2")
-    deck = Deck()
-    deck.make_smaller_deck()
-    deck.shuffle()
-    game = Gin_Rummy(player1, player2)
-    game.start_new_game()
-    start_state = Game_State(game, "discard")
-    start_state.main_player_hand.add(deck[0])
+    oracle = Gin_Oracle()
+    #game.start_new_game()
+    #start_state = Game_State(game, "draw")
     #root = Node(start_state)
-    depth = 5
-    #root.create_children_tree(root, depth)
+    #root.create_children()
+    #start_state = root.children[0].game_state
+    game, known_cards, stage = oracle.create_random_game()
+    start_state = Game_State(game, stage, known_cards)
+    depth = 10
     resolver = Super_Simple_CFR()
-    best = resolver.resolve(start_state, "EndGame", depth, 1)
-    print("Best strategy: ", best)
+    best = resolver.resolve(start_state, "end_game", depth, 1)
         
 if __name__ == "__main__":
         main()
