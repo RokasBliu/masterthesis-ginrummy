@@ -245,13 +245,34 @@ def pygame_display(game):
         window.blit(player_2_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
 
         # Display player turn
+        my_font = pygame.font.SysFont('Comic Sans MS', 20 // (screen_height // window_height))
         player_turn = game.turn_index
         turn_state = "DRAW"
         if len(game.players[player_turn].hand.cards) > game.SMALLER_NUM_CARDS_PER_HAND if game.is_smaller_deck else game.NORMAL_NUM_CARDS_PER_HAND:
             turn_state = "DISCARD"
         turn_text = my_font.render(turn_state, False, (0, 0, 0), (0,125,0) if turn_state == "DRAW" else (125,0,0))
-        turn_text_position = (custom_border_width - player_1_text.get_width() + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8) if player_turn == 0 else (custom_border_width - player_1_text.get_width() + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3)
+        if game.players[player_turn].player_knock == True:
+            turn_state = "KNOCK?"
+            turn_text = my_font.render(turn_state, False, (0, 0, 0), (0,0,125))
+        turn_text_position = (custom_border_width - turn_text.get_width() + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8) if player_turn == 0 else (custom_border_width - player_1_text.get_width() + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3)
         window.blit(turn_text, turn_text_position)
+
+        # Display player score
+        player_1_score = my_font.render(f"Score: {game.players[0].score}", False, (0, 0, 0))
+        window.blit(player_1_score, (custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8))
+        player_2_score = my_font.render(f"Score: {game.players[1].score}", False, (0, 0, 0))
+        window.blit(player_2_score, (custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
+
+        # Display game info
+        round_num = game.round_number
+        round_num_text = my_font.render(f"Round: {round_num}", False, (0, 0, 0))
+        window.blit(round_num_text, (custom_window_placement[0], (custom_border_height - round_num_text.get_height()) / 2 + custom_window_placement[1]))
+        cards_left = len(game.deck)
+        cards_left_text = my_font.render(f"Deck size: {cards_left}", False, (0, 0, 0))
+        window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()) / 2 + custom_window_placement[1]))
+
+        # Some logic where the player can interract with cards on the screen by clicking on them
+
 
     def display_loop(game, window):
         while True:
@@ -266,6 +287,9 @@ def pygame_display(game):
                             sys.exit()
                     if event.type == pygame.VIDEORESIZE:
                         window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if pygame.mouse.get_pressed()[0]: # Left click
+                            print('Left mouse button pressed!')
             except KeyboardInterrupt:
                 break
 
