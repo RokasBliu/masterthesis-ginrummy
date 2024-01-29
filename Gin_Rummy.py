@@ -1,6 +1,7 @@
 from Deck import Deck
 from Player import Player
 from Hand import Hand
+from queue import Queue
 import threading
 import pygame
 import sys
@@ -59,12 +60,14 @@ class Gin_Rummy(object):
             for p in self.players:
                 p.hand.add(self.deck.deal())
 
-    def draw(self, player):
+    def draw(self, player, in_q):
         answering = False
         while answering == False:
             print("Your hand: ", player.hand.sort_by_rank())
             print("Top of discard pile: ", self.discard_pile[-1])
-            answer = input("Draw random or from discard?")
+            # answer = input("Draw random or from discard?")
+            # answering = answer.lower() == "random" or answer.lower() == "discard"
+            answer = in_q.get()
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
         if answer.lower() == "random":
@@ -75,17 +78,17 @@ class Gin_Rummy(object):
             player.hand.add(self.discard_pile.pop())
             self.drawing_from_discard = True
 
-    def discard(self, player):
+    def discard(self, player, in_q):
         print("Your hand: ", player.hand.sort_by_rank())
         check_if_int = False
         while check_if_int == False:
-            answer = input(f"Which card do you want to discard? (1-{self.SMALLER_NUM_CARDS_PER_HAND + 1 if self.is_smaller_deck else self.NORMAL_NUM_CARDS_PER_HAND + 1})")
+            # answer = input(f"Which card do you want to discard? (1-{self.SMALLER_NUM_CARDS_PER_HAND + 1 if self.is_smaller_deck else self.NORMAL_NUM_CARDS_PER_HAND + 1})")
+            answer = in_q.get()
             check_if_int = True
             try:
                 int(answer)
             except ValueError:
                 check_if_int = False
-
         
         card = player.hand.cards[int(answer)-1]
         player.hand.cards.remove(card)
@@ -94,7 +97,10 @@ class Gin_Rummy(object):
 
         if player.hand.get_hand_score() <= 10:
             player.player_knock = True
-            knock_answer = input("Do you want to knock? (y/n)")
+            answering = False
+            while answering == False:
+                knock_answer = in_q.get()
+                answering = knock_answer.lower() == "y" or knock_answer.lower() == "n"
 
             if knock_answer.lower() == "y":
                 self.knock(player)
@@ -157,7 +163,7 @@ class Gin_Rummy(object):
         self.deal()
         self.discard_pile.append(self.deck.deal())
 
-    def game_flow(self):
+    def game_flow(self, in_q):
         self.start_new_game(True)
         print("------------------")
         print("Game started")
@@ -166,8 +172,8 @@ class Gin_Rummy(object):
         while self.game_over == False:
             print("Round number: ", self.round_number)
             print(self.players[self.turn_index].name, "'s turn")
-            self.draw(self.players[self.turn_index])
-            self.discard(self.players[self.turn_index])
+            self.draw(self.players[self.turn_index], in_q)
+            self.discard(self.players[self.turn_index], in_q)
 
             # Check if the deck has only 2 cards left, in which case, the game ends in a draw
             if len(self.deck) <= 2:
@@ -176,7 +182,7 @@ class Gin_Rummy(object):
 
             print("Next turn")
 
-def pygame_display(game):
+def pygame_display(game, out_q):
     pygame.init()
     bounds = (1280, 600)
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
@@ -187,7 +193,7 @@ def pygame_display(game):
     # Init font
     pygame.font.init()
         
-    def display_cards(game, window):
+    def display_cards(game, window, mouse_click_pos):
         # Define some useful variables
         window_width, window_height = window.get_size()
         screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
@@ -210,19 +216,21 @@ def pygame_display(game):
         resized_card_back = pygame.transform.scale(card_back, (int(resized_card_width), int(resized_card_height)))
 
         # Display deck
-        window.blit(resized_card_back, (custom_border_width / 2 + padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
+        deck_surface = window.blit(resized_card_back, (custom_border_width / 2 + padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
 
         # Display discard pile
         discard_pile_card = pygame.image.load('images/blank_card.svg')
         if game.discard_pile:
             discard_pile_card = game.discard_pile[-1].image
             discard_pile_card = pygame.transform.scale(discard_pile_card, (int(resized_card_width), int(resized_card_height)))
-        window.blit(discard_pile_card, (custom_border_width / 2 - resized_card_width - padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
+        discard_pile_surface = window.blit(discard_pile_card, (custom_border_width / 2 - resized_card_width - padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
 
         # Display cards in hand
+        player_card_surfaces = []
         player_i = 1
         for player in game.players:
             card_i = 0
+            current_player_card_surfaces = []
             for card in player.hand.cards:
                 image = card.image
                 # If card isHidden, we want to not show it
@@ -231,10 +239,12 @@ def pygame_display(game):
                 # Transform card's size
                 image = pygame.transform.scale(image, (int(resized_card_width), int(resized_card_height)))
                 # Render card on screen
-                window.blit(image,
+                card_surface = window.blit(image,
                  ((resized_card_width + padding) * card_i + (custom_border_width/2 - resized_card_width*(game.SMALLER_NUM_CARDS_PER_HAND / 2 if game.is_smaller_deck else game.NORMAL_NUM_CARDS_PER_HAND / 2) + custom_window_placement[0]),
                  (custom_border_height - resized_card_height) * player_i + custom_window_placement[1]))
                 card_i += 1
+                current_player_card_surfaces.append(card_surface)
+            player_card_surfaces.append(current_player_card_surfaces)
             player_i -= 1
 
         # Display player text
@@ -256,6 +266,11 @@ def pygame_display(game):
             turn_text = my_font.render(turn_state, False, (0, 0, 0), (0,0,125))
         turn_text_position = (custom_border_width - turn_text.get_width() + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8) if player_turn == 0 else (custom_border_width - player_1_text.get_width() + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3)
         window.blit(turn_text, turn_text_position)
+        knock_button = None
+        dont_knock_button = None
+        if turn_state == "KNOCK?":
+            knock_button = window.blit(my_font.render("YES", False, (0, 0, 0), (0,125,0)), (turn_text_position[0] - turn_text.get_width(), turn_text_position[1]))
+            dont_knock_button = window.blit(my_font.render("NO", False, (0, 0, 0), (125,0,0)), (turn_text_position[0] - turn_text.get_width()/2, turn_text_position[1]))
 
         # Display player score
         player_1_score = my_font.render(f"Score: {game.players[0].score}", False, (0, 0, 0))
@@ -272,10 +287,28 @@ def pygame_display(game):
         window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()) / 2 + custom_window_placement[1]))
 
         # Some logic where the player can interract with cards on the screen by clicking on them
+        mouse_click_x, mouse_click_y = mouse_click_pos
+        if deck_surface.collidepoint(mouse_click_x, mouse_click_y) and turn_state == "DRAW":
+            out_q.put("random")
+        elif discard_pile_surface.collidepoint(mouse_click_x, mouse_click_y) and turn_state == "DRAW":
+            out_q.put("discard")
 
+        player_card_i = 0
+        for player_card_surface in player_card_surfaces[player_turn]:
+            if player_card_surface.collidepoint(mouse_click_x, mouse_click_y) and turn_state == "DISCARD":
+                out_q.put(player_card_i+1)
+                break
+            player_card_i += 1
+
+        if turn_state == "KNOCK?" and not knock_button == None and not dont_knock_button == None:
+            if knock_button.collidepoint(mouse_click_x, mouse_click_y):
+                out_q.put("y")
+            elif dont_knock_button.collidepoint(mouse_click_x, mouse_click_y):
+                out_q.put("n")
 
     def display_loop(game, window):
         while True:
+            mouse_click_pos = (0, 0)
             # Handle interrupts, window resizes and "quit" events
             try:
                 for event in pygame.event.get():
@@ -289,21 +322,21 @@ def pygame_display(game):
                         window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if pygame.mouse.get_pressed()[0]: # Left click
-                            print('Left mouse button pressed!')
+                            mouse_click_pos = pygame.mouse.get_pos()
             except KeyboardInterrupt:
                 break
 
             # Rendering
             window.fill((30, 92, 58))
-            display_cards(game, window)
+            display_cards(game, window, mouse_click_pos)
             pygame.display.update()
             clock.tick(FPS)
     
     display_loop(game, window)
     pygame.quit()
 
-def game_thread(game):
-    game.game_flow()
+def game_thread(game, in_q):
+    game.game_flow(in_q)
 
 def main():
     player1 = Player("Player 1")
@@ -311,12 +344,14 @@ def main():
 
     game = Gin_Rummy(player1, player2)
 
+    q = Queue() # used for communicating between threads
+
     # Running game logic on a seperate daemon thread
-    thread = threading.Thread(target=game_thread, args=(game, ), daemon=True)
+    thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
     thread.start()
 
     # This main thread will be running the display
-    pygame_display(game)
+    pygame_display(game, q)
             
 
 if __name__ == "__main__":
