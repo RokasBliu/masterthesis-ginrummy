@@ -14,6 +14,7 @@ class Game_State(object):
         self.round_number = game.round_number
 
         self.state = state
+        self.probability = 1
 
         self.main_player_deadwood = self.main_player.hand.get_hand_score()
         self.main_player_expected_utility = self.main_player_deadwood
@@ -75,8 +76,11 @@ class Game_State(object):
         
         #TODO Adjust "probability score" of opponent, because it did not draw from the discard pile
         else:
+            print("Opponent drew from deck")
             self.action = Action("Draw from deck", new_card, "opponent")
+            print("Probability: ", self.probability)
 
+        self.probability = self.probability/2
         self.state = "discard"
     
     def discard_from_hand(self, card=None):
@@ -120,12 +124,12 @@ class Game_State(object):
     
     def print_state(self):
         print("--------------------")
-        #print("State: ", self.state)
+        print("State: ", self.state)
         #print("Round number: ", self.round_number)
         print("Action done this turn: ", self.action)
         print("Main player's hand: ", self.main_player_hand)
         print("Main player's deadwood: ", self.main_player_deadwood)
         print("Main player's expected utility: ", self.main_player_expected_utility)
-        #print("Discard pile: ", self.discard_pile)
+        print("Discard pile: ", self.discard_pile)
         #print("Opponent category distribution: ", self.opponent_category_dist)
         #print("Random card distribution: ", self.rand_card_dist)

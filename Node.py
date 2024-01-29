@@ -14,6 +14,7 @@ class Node:
         self.action = None
         self.depth = 0
         self.children_count = 0
+        self.probability = 1
         if parent != None:
             self.depth = parent.depth + 1
 
@@ -22,13 +23,13 @@ class Node:
         #self.game_state.print_state()
         #print("Depth: ", self.depth)
         if self.game_state.state == "draw":
-            #Draw from discard pile
+            #Draw from discard pile          
             new_state = copy.deepcopy(self.game_state)
             child = Node(new_state, self)
             child.game_state.draw_from_discard_pile()
             self.children.append(child)
-            child.game_state.print_state()
-            print("Depth: ", child.depth)
+            #child.game_state.print_state()
+            #print("Depth: ", child.depth)
 
             #Draw from deck
             # deck = Deck()
@@ -47,8 +48,8 @@ class Node:
             child = Node(new_state, self)
             child.game_state.draw_card()
             self.children.append(child)
-            child.game_state.print_state()
-            print("Depth: ", child.depth)
+            #child.game_state.print_state()
+            #print("Depth: ", child.depth)
         
         elif self.game_state.state == "discard":
             #Make states for each card in hand
@@ -58,15 +59,15 @@ class Node:
                     child = Node(new_state, self)
                     child.game_state.discard_from_hand(c)
                     self.children.append(child)
-                    child.game_state.print_state()
-                    print("Depth: ", child.depth)
+                    #child.game_state.print_state()
+                    #print("Depth: ", child.depth)
             else:
                 new_state = copy.deepcopy(self.game_state)
                 child = Node(new_state, self)
                 child.game_state.discard_from_hand()
                 self.children.append(child)
-                child.game_state.print_state()
-                print("Depth: ", child.depth)
+                #child.game_state.print_state()
+                #print("Depth: ", child.depth)
 
 
         elif self.game_state.state == "knock":
@@ -75,13 +76,13 @@ class Node:
             child = Node(new_state, self)
             child.game_state.knock()
             self.children.append(child)
-            child.game_state.print_state()
-            print("Depth: ", child.depth)
+            #child.game_state.print_state()
+            #print("Depth: ", child.depth)
 
             if self.game_state.main_player_deadwood > 0:
                 new_state = copy.deepcopy(self.game_state)
-                child = Node(new_state, self)
-                child.game_state.state = "draw"
+                #child = Node(new_state, self)
+                #child.game_state.state = "draw"
         
         elif self.game_state.state == "end_game":
             return

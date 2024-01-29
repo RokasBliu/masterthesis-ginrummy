@@ -18,5 +18,10 @@ class Card(object):
                 return f"Phantom Card" #{self.phantom_values}
             return f"{self.value} of {self.suit}" #meld ids: {self.meld_ids}
         
+        def __str__(self):
+            if self.isPhantom:
+                return f"Phantom Card"
+            return f"{self.value} of {self.suit}"
+        
         def __eq__(self, other):
             return self.value == other.value and self.suit == other.suit

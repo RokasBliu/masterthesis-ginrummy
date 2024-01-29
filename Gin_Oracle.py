@@ -90,7 +90,8 @@ class Gin_Oracle:
         #Category #6 - Info about opponent (The main player)
 
         if drew_from_dicard_pile:
-            assert card_drawn is not None
+            if card_drawn.isPhantom:
+                return category_dist
             if len(opponent_known_cards) > 0:
                 #Check if know cards can make a meld with the card drawn
                 if len(opponent_known_cards) > 2:
@@ -103,7 +104,7 @@ class Gin_Oracle:
                     hasSequence = self.check_for_sequence(opponent_known_cards)
 
                 for c in opponent_known_cards:
-                    print("Card drawn: ", c.value, " Card in hand: ", card_drawn.value)
+                    #print("Card drawn: ", card_drawn.value, " Card in hand: ", c.value)
                     if c.value == card_drawn.value:
                         category_dist[0] += 1
                         category_dist[2] += 0.2
