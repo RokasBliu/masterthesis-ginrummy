@@ -135,8 +135,6 @@ class Gin_Rummy(object):
         if player.hand.deadwood == 0:
             player.score += self.GIN_POINTS
 
-
-
         print("Player 1's score: ", self.players[0].score)
         print("Player 2's score: ", self.players[1].score)
 
