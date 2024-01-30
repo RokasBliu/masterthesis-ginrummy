@@ -196,7 +196,7 @@ def pygame_display(game, out_q):
         window_width, window_height = window.get_size()
         screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
         custom_border_width, custom_border_height = (window_width * 0.5, window_height * 0.7)
-        custom_window_placement = (window_width/2 - custom_border_width/2, window_height/2 - custom_border_height/2)
+        custom_window_placement = (10, window_height/2 - custom_border_height/2)
         padding = 2
 
         # Draw window border
@@ -350,7 +350,6 @@ def main():
 
     # This main thread will be running the display
     pygame_display(game, q)
-            
 
 if __name__ == "__main__":
     main()
