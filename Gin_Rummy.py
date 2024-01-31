@@ -2,6 +2,7 @@ from Deck import Deck
 from Player import Player
 from Hand import Hand
 from queue import Queue
+from BarChart import BarChart
 import threading
 import pygame
 import sys
@@ -238,7 +239,7 @@ def pygame_display(game, out_q):
                 image = pygame.transform.scale(image, (int(resized_card_width), int(resized_card_height)))
                 # Render card on screen
                 card_surface = window.blit(image,
-                 ((resized_card_width + padding) * card_i + (custom_border_width/2 - resized_card_width*(game.SMALLER_NUM_CARDS_PER_HAND / 2 if game.is_smaller_deck else game.NORMAL_NUM_CARDS_PER_HAND / 2) + custom_window_placement[0]),
+                 ((resized_card_width + padding) * card_i + (custom_border_width/2 - resized_card_width*(len(player.hand.cards) / 2) + custom_window_placement[0]),
                  (custom_border_height - resized_card_height) * player_i + custom_window_placement[1]))
                 card_i += 1
                 current_player_card_surfaces.append(card_surface)
@@ -305,6 +306,12 @@ def pygame_display(game, out_q):
                 out_q.put("n")
 
     def display_loop(game, window):
+        # For drag and drop
+        move_box = None
+        inflate_box = None
+
+        test_chart = BarChart("testChart", 200, 200,  window.get_width() // 2, 0, [1,2,3,4,10,18,24], [4,3,9,2,7,12,5], 1)
+        
         while True:
             mouse_click_pos = (0, 0)
             # Handle interrupts, window resizes and "quit" events
@@ -319,14 +326,32 @@ def pygame_display(game, out_q):
                     if event.type == pygame.VIDEORESIZE:
                         window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        if pygame.mouse.get_pressed()[0]: # Left click
+                        if event.button == 1: # Left click
                             mouse_click_pos = pygame.mouse.get_pos()
+                            if test_chart.collidepoint(event.pos):
+                                move_box = test_chart
+                        if event.button == 3: # Right click
+                            if test_chart.collidepoint(event.pos):
+                                inflate_box = test_chart
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        if event.button == 1: # Left click
+                            move_box = None
+                        if event.button == 3: # Right click
+                            inflate_box = None
+                    if event.type == pygame.MOUSEMOTION:
+                        if move_box != None:
+                            move_box.move_ip(event.rel, window.get_width()//2, window.get_width(), 0, window.get_height())
+                        if inflate_box != None:
+                            inflate_box.inflate(event.rel, 400, 400)
+
             except KeyboardInterrupt:
                 break
 
             # Rendering
             window.fill((30, 92, 58))
             display_cards(game, window, mouse_click_pos)
+            test_chart.draw(window)
+            #display_bar_chart(figure, "DummyChart", [1,2,3,4,10,18,24], [4,3,9,2,7,12,5], window)
             pygame.display.update()
             clock.tick(FPS)
     
