@@ -47,7 +47,7 @@ class Super_Simple_CFR:
         best_strategy = self.strategies.idxmax(axis=1)
         
         print("Best strategy: ", best_strategy[0])
-        return best_strategy, best_strategy
+        return best_strategy
     
     def traverse(self, node, EndStage, EndDepth):
         #print("Traversing")

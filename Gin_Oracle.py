@@ -101,8 +101,8 @@ class Gin_Oracle:
                     hasMeld = self.check_for_meld_equal_cards(opponent_known_cards)
                     if hasMeld:
                         category_dist[0] = 10
-                        category_dist[2] = 2
-                        category_dist[4] = 1
+                        category_dist[2] += 2
+                        category_dist[4] += 1
 
                     #hasSequence = self.check_for_sequence(opponent_known_cards)
 
@@ -166,6 +166,9 @@ class Gin_Oracle:
         
         stages = ["draw", "discard"]
         random_stage = stages[(random.randint(0, 1))]
+
+        if random_stage == "discard":
+            game.players[game.turn_index].hand.add(game.deck.deal())
 
         return game, known_cards, random_stage
 
