@@ -1,10 +1,7 @@
-import pygame
-
 class Card(object):
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
-            #if self.value != "":
             #self.image = pygame.image.load('images/' + self.suit + '_' + str(self.value) + '.svg')
             self.isHidden = False
             self.isPhantom = False
