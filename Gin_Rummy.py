@@ -1,3 +1,4 @@
+#from Bot_manager import Bot_Manager
 from Deck import Deck
 from Player import Player
 from Hand import Hand
@@ -11,6 +12,7 @@ import sys
 
 class Gin_Rummy(object):
     def __init__(self, player1, player2):
+        #self.thread = threading
         self.players = [player1, player2]
         self.turn_index = 0 # 0 for player1, 1 for player2
 
@@ -32,6 +34,7 @@ class Gin_Rummy(object):
         self.SMALLER_NUM_CARDS_PER_HAND = 7
 
         self.is_smaller_deck = False
+        #self.bot_manager = Bot_Manager()
 
     def start_new_game(self, with_smaller_deck=True):
         self.is_smaller_deck = with_smaller_deck
@@ -70,7 +73,15 @@ class Gin_Rummy(object):
             print("Top of discard pile: ", self.discard_pile[-1])
             # answer = input("Draw random or from discard?")
             # answering = answer.lower() == "random" or answer.lower() == "discard"
-            answer = in_q.get()
+            if player.name == "CFR":
+                print("CFR is thinking...")
+                answer = self.bot_manager.get_action_from_bot("draw", "Super_Simple_CFR", self)
+                print("CFR chose: ", answer)
+                in_q.get()
+            else:
+            
+                answer = in_q.get()
+                
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
         if answer.lower() == "random":
@@ -193,8 +204,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "Bot 1", "Bot 2", "Bot 3"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "Bot 1", "Bot 2", "Bot 3"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "CFR", "Bot 2", "Bot 3"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "CFR", "Bot 2", "Bot 3"], 200, 50)
 
 
         # Main menu loop
@@ -430,8 +441,8 @@ def main():
     q = Queue() # used for communicating between threads
 
     # Running game logic on a seperate daemon thread
-    thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
-    thread.start()
+    game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
+    game.thread.start()
 
     # This main thread will be running the display
     pygame_display(game, q, window, clock, FPS)

@@ -2,7 +2,7 @@ import random
 from Gin_Rummy import Gin_Rummy
 from Hand import Hand
 from Deck import Deck
-from copy import deepcopy, copy
+from copy import deepcopy
 
 from Player import Player
 class Gin_Oracle:
