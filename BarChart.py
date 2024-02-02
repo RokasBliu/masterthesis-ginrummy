@@ -14,6 +14,7 @@ class BarChart(object):
         self.rects = []
 
     def draw(self, window, color=(0, 0, 0)):
+        self.rects = []
         for num, x in enumerate(self.xdata):
             self.rects.append(pygame.draw.rect(window, color, pygame.Rect(self.xpos + self.bar_width * num, self.ypos + (self.height - self.height * (self.ydata[num] / max(self.ydata))), self.bar_width - self.padding, self.height * (self.ydata[num] / max(self.ydata)))))
 

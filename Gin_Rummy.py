@@ -3,6 +3,8 @@ from Player import Player
 from Hand import Hand
 from queue import Queue
 from BarChart import BarChart
+from DropDownMenu import DropDownMenu
+from Button import Button
 import threading
 import pygame
 import sys
@@ -181,17 +183,57 @@ class Gin_Rummy(object):
 
             print("Next turn")
 
-def pygame_display(game, out_q):
-    pygame.init()
-    bounds = (1280, 600)
-    window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
-    pygame.display.set_caption("Gin Rummy")
-    clock = pygame.time.Clock()
-    FPS = 12
+def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_name=["Player 2"]):
+    def display_loop(window, player1_name, player2_name):
+        # Title
+        my_font = pygame.font.SysFont('Comic Sans MS', 50)
+        title = my_font.render("Gin Rummy", False, (255, 255, 255))
 
-    # Init font
-    pygame.font.init()
-        
+        # Start button
+        start_button = Button("Start", 200, 50)
+
+        # Dropdown menu
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "Bot 1", "Bot 2", "Bot 3"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "Bot 1", "Bot 2", "Bot 3"], 200, 50)
+
+
+        # Main menu loop
+        start_game = False
+        while start_game == False:
+            try:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            pygame.quit()
+                            sys.exit()
+                    if event.type == pygame.VIDEORESIZE:
+                        window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1: # Left click
+                            main_menu_dropdown_p1.process_click(event.pos)
+                            main_menu_dropdown_p2.process_click(event.pos)
+                            if start_button.collidepoint(event.pos):
+                                player1_name[0] = main_menu_dropdown_p1.selected_item
+                                player2_name[0] = main_menu_dropdown_p2.selected_item
+                                start_game = True
+            except KeyboardInterrupt:
+                pygame.quit()
+                sys.exit()
+
+            window.fill((30, 92, 58))
+            window.blit(title, (window.get_width()//2 - title.get_width()//2, window.get_height()//2 - 200))
+            start_button.draw(window, window.get_width()//2 - 100, window.get_height()//2 - 25)
+            main_menu_dropdown_p1.draw(window, window.get_width()//2 - 210, window.get_height()//2 + 50)
+            main_menu_dropdown_p2.draw(window, window.get_width()//2 + 10, window.get_height()//2 + 50)
+            pygame.display.update()
+            clock.tick(FPS)
+    
+    display_loop(window, player1_name, player2_name)
+
+def pygame_display(game, out_q, window, clock, FPS):        
     def display_cards(game, window, mouse_click_pos):
         # Define some useful variables
         window_width, window_height = window.get_size()
@@ -248,9 +290,9 @@ def pygame_display(game, out_q):
 
         # Display player text
         my_font = pygame.font.SysFont('Comic Sans MS', 30 // (screen_height // window_height))
-        player_1_text = my_font.render('Player 1', False, (0, 0, 0))
+        player_1_text = my_font.render(game.players[0].name, False, (0, 0, 0))
         window.blit(player_1_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8))
-        player_2_text = my_font.render('Player 2', False, (0, 0, 0))
+        player_2_text = my_font.render(game.players[1].name, False, (0, 0, 0))
         window.blit(player_2_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
 
         # Display player turn
@@ -310,7 +352,8 @@ def pygame_display(game, out_q):
         move_box = None
         inflate_box = None
 
-        test_chart = BarChart("testChart", 200, 200,  window.get_width() // 2, 0, [1,2,3,4,10,18,24], [4,3,9,2,7,12,5], 1)
+        # This is just a test chart, will be updated soon
+        # test_chart = BarChart("testChart", 200, 200,  window.get_width() // 2, 0, [1,2,3,4,10,18,24], [4,3,9,2,7,12,5], 1)
         
         while True:
             mouse_click_pos = (0, 0)
@@ -318,7 +361,8 @@ def pygame_display(game, out_q):
             try:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        return
+                        pygame.quit()
+                        sys.exit()
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
                             pygame.quit()
@@ -328,11 +372,12 @@ def pygame_display(game, out_q):
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1: # Left click
                             mouse_click_pos = pygame.mouse.get_pos()
-                            if test_chart.collidepoint(event.pos):
-                                move_box = test_chart
+                            # if test_chart.collidepoint(event.pos):
+                            #     move_box = test_chart
                         if event.button == 3: # Right click
-                            if test_chart.collidepoint(event.pos):
-                                inflate_box = test_chart
+                            # if test_chart.collidepoint(event.pos):
+                            #     inflate_box = test_chart
+                            pass
                     if event.type == pygame.MOUSEBUTTONUP:
                         if event.button == 1: # Left click
                             move_box = None
@@ -345,25 +390,40 @@ def pygame_display(game, out_q):
                             inflate_box.inflate(event.rel, 400, 400)
 
             except KeyboardInterrupt:
-                break
+                pygame.quit()
+                sys.exit()
 
             # Rendering
             window.fill((30, 92, 58))
             display_cards(game, window, mouse_click_pos)
-            test_chart.draw(window)
-            #display_bar_chart(figure, "DummyChart", [1,2,3,4,10,18,24], [4,3,9,2,7,12,5], window)
+            # test_chart.draw(window)
             pygame.display.update()
             clock.tick(FPS)
     
     display_loop(game, window)
-    pygame.quit()
 
 def game_thread(game, in_q):
     game.game_flow(in_q)
 
 def main():
-    player1 = Player("Player 1")
-    player2 = Player("Player 2")
+    pygame.init()
+    bounds = (1280, 600)
+    window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
+    pygame.display.set_caption("Gin Rummy")
+    clock = pygame.time.Clock()
+    FPS = 12
+
+    # Init font
+    pygame.font.init()
+
+    p1_name = ["Player 1"]
+    p2_name = ["Player 2"]
+
+    # Before we start the game, we have to promt the main menu screen where player can choose bots etc.
+    main_menu_display(window, clock, FPS, p1_name, p2_name)
+
+    player1 = Player(p1_name[0])
+    player2 = Player(p2_name[0])
 
     game = Gin_Rummy(player1, player2)
 
@@ -374,7 +434,8 @@ def main():
     thread.start()
 
     # This main thread will be running the display
-    pygame_display(game, q)
+    pygame_display(game, q, window, clock, FPS)
+    pygame.quit()
 
 if __name__ == "__main__":
     main()
