@@ -4,8 +4,7 @@ from Deck import Deck
 from Hand import Hand
 from Player import Player
 from Gin_Rummy import Gin_Rummy
-import pytest
-import itertools
+from queue import Queue
 
 class Test():
     def test_card_in_two_melds_edgecase(self):
@@ -143,9 +142,11 @@ class Test():
         assert len(game.discard_pile) == 1, f"Discard pile should have 1 card, but has {len(game.discard_pile)}"
 
     
-    def test_player_draw_random_and_discard(self, monkeypatch):
-        responses = iter(["random", "1", "n"])
-        monkeypatch.setattr("builtins.input", lambda inp: next(responses))
+    def test_player_draw_random_and_discard(self):
+        q = Queue()
+        q.put("random")
+        q.put(1)
+        q.put("n")
 
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
@@ -157,13 +158,13 @@ class Test():
         assert len(game.deck) == 21, f"The deck should have 21 cards left, but has {len(game.deck)}"
         assert len(game.discard_pile) == 1, f"Discard pile should have 1 card, but has {len(game.discard_pile)}"
 
-        game.draw(game.players[game.turn_index])
+        game.draw(game.players[game.turn_index], q)
 
         assert len(game.deck) == 20, f"The deck should have 20 cards left, but has {len(game.deck)}"
         assert len(game.discard_pile) == 1, f"Discard pile should have 1 card, but has {len(game.discard_pile)}"
         assert len(game.players[0].hand.cards) == 8, f"Player should have drawn an extra card but has {len(game.players[0].hand.cards)}"
 
-        game.discard(game.players[game.turn_index])
+        game.discard(game.players[game.turn_index], q)
 
         assert len(game.deck) == 20, f"The deck should have 20 cards left, but has {len(game.deck)}"
         assert len(game.discard_pile) == 2, f"Discard pile should have 2 card, but has {len(game.discard_pile)}"
@@ -171,9 +172,11 @@ class Test():
         assert game.turn_index == 1, "It should be next player's turn now"
 
 
-    def test_player_draw_discard_and_discard(self, monkeypatch):
-        responses = iter(["discard", "1", "n"])
-        monkeypatch.setattr("builtins.input", lambda inp: next(responses))
+    def test_player_draw_discard_and_discard(self):
+        q = Queue()
+        q.put("discard")
+        q.put(1)
+        q.put("n")
 
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
@@ -185,13 +188,13 @@ class Test():
         assert len(game.deck) == 21, f"The deck should have 21 cards left, but has {len(game.deck)}"
         assert len(game.discard_pile) == 1, f"Discard pile should have 1 card, but has {len(game.discard_pile)}"
 
-        game.draw(game.players[game.turn_index])
+        game.draw(game.players[game.turn_index], q)
 
         assert len(game.deck) == 21, f"The deck should have 21 cards left, but has {len(game.deck)}"
         assert len(game.discard_pile) == 0, f"Discard pile should have 0 card, but has {len(game.discard_pile)}"
         assert len(game.players[0].hand.cards) == 8, f"Player should have drawn an extra card but has {len(game.players[0].hand.cards)}"
 
-        game.discard(game.players[game.turn_index])
+        game.discard(game.players[game.turn_index], q)
 
         assert len(game.deck) == 21, f"The deck should have 21 cards left, but has {len(game.deck)}"
         assert len(game.discard_pile) == 1, f"Discard pile should have 2 card, but has {len(game.discard_pile)}"
@@ -199,9 +202,15 @@ class Test():
         assert game.turn_index == 1, "It should be next player's turn now"
 
 
-    def test_gameflow(self, monkeypatch):
-        responses = iter(["discard", "1", "discard", "2", "discard", "1", "y"])
-        monkeypatch.setattr("builtins.input", lambda inp: next(responses))
+    def test_gameflow(self):
+        q = Queue()
+        q.put("discard")
+        q.put(1)
+        q.put("discard")
+        q.put(2)
+        q.put("discard")
+        q.put(1)
+        q.put("y")
 
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
@@ -233,4 +242,4 @@ class Test():
 
         game.discard_pile = [Card("Hearts", "7")]
 
-        game.game_flow()
+        game.game_flow(q)
