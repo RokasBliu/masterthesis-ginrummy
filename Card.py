@@ -1,7 +1,10 @@
+import pygame
+
 class Card(object):
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
+            self.image = pygame.image.load('images/' + self.suit + '_' + str(self.value) + '.svg')
             self.isHidden = False
             self.isPhantom = False
             self.phantom_values = []
@@ -10,6 +13,8 @@ class Card(object):
         def make_phantom_card(self, phantom_values):
             self.suit = None
             self.value = None
+            self.image = pygame.image.load('images/joker_red.svg')
+            self.isHidden = False
             self.isPhantom = True
             self.phantom_values = phantom_values
 

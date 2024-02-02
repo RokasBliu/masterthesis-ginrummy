@@ -5,7 +5,7 @@ class Player(object):
         self.name = name
         self.hand = Hand()
         self.score = 0
-        self.isHuman = True
+        self.is_human = True
         self.player_knock = False
         self.player_draw = True # True when it is player's turn to draw; False when it is not
         self.player_discard = False # True when it is player's turn to discard; False when it is not
