@@ -262,7 +262,7 @@ def pygame_display(game, out_q, window, clock, FPS):
         # Display discard pile
         discard_pile_card = pygame.image.load('images/blank_card.svg')
         if game.discard_pile:
-            discard_pile_card = game.discard_pile[-1].image
+            discard_pile_card = pygame.image.load('images/' + game.discard_pile[-1].suit + '_' + str(game.discard_pile[-1].value) + '.svg')
             discard_pile_card = pygame.transform.scale(discard_pile_card, (int(resized_card_width), int(resized_card_height)))
         discard_pile_surface = window.blit(discard_pile_card, (custom_border_width / 2 - resized_card_width - padding + custom_window_placement[0], (custom_border_height - resized_card_height) / 2 + custom_window_placement[1]))
 
@@ -273,7 +273,7 @@ def pygame_display(game, out_q, window, clock, FPS):
             card_i = 0
             current_player_card_surfaces = []
             for card in player.hand.cards:
-                image = card.image
+                image = pygame.image.load('images/' + card.suit + '_' + str(card.value) + '.svg')
                 # If card isHidden, we want to not show it
                 if card.isHidden:
                     image = card_back
