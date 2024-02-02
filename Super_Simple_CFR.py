@@ -29,7 +29,7 @@ class Super_Simple_CFR:
 
         if stage == "draw":
             #Important that theese strategies are in the same order as it is in the game_state
-            self.strategies = pd.DataFrame({"draw_from_discard_pile": [0], "draw_from_random_deck": [0]})
+            self.strategies = pd.DataFrame({"discard": [0], "random": [0]})
             print("Strategies: ", self.strategies)
             print("Strategies columns: ", self.strategies.columns)
         elif stage == "discard":
@@ -44,9 +44,14 @@ class Super_Simple_CFR:
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
         print(self.strategies)
-        best_strategy = self.strategies.idxmax(axis=1)
+        best_strategy = self.strategies.idxmax(axis=1)[0]
         
-        print("Best strategy: ", best_strategy[0])
+        print("Best strategy: ", best_strategy)
+
+        if stage == "discard":
+            return self.strategies.columns.get_loc(best_strategy) + 1
+        
+
         return best_strategy
     
     def traverse(self, node, EndStage, EndDepth):
@@ -116,6 +121,7 @@ def main():
     depth = 10
     resolver = Super_Simple_CFR()
     best = resolver.resolve(start_state, "end_game", depth, 1)
+    print("Best", best)
         
 if __name__ == "__main__":
         main()
