@@ -22,7 +22,8 @@ class Game_State(object):
 
         self.other_player_score = game.players[(self.turn_index + 1) % 2].score
         self.discard_pile = game.discard_pile
-        self.top_card_discard_pile = self.discard_pile[-1]
+        if len(self.discard_pile) > 0:
+            self.top_card_discard_pile = self.discard_pile[-1]
 
         self.opponent_known_cards = opponent_known_cards
         self.opponent_category_dist = np.zeros(6) #TODO: Make this more accurate
@@ -136,6 +137,7 @@ class Game_State(object):
         print("Main player's deadwood: ", self.main_player_deadwood)
         print("Main player's expected utility: ", self.main_player_expected_utility)
         print("Discard pile: ", self.discard_pile)
+        print("Top card of discard pile: ", self.top_card_discard_pile)
         print("Known cards: ", self.opponent_known_cards)
         #print("Opponent category distribution: ", self.opponent_category_dist)
         #print("Random card distribution: ", self.rand_card_dist)

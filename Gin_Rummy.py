@@ -1,4 +1,4 @@
-#from Bot_manager import Bot_Manager
+from Bot_manager import Bot_Manager
 from Deck import Deck
 from Player import Player
 from Hand import Hand
@@ -9,6 +9,7 @@ from Button import Button
 import threading
 import pygame
 import sys
+from Bot_manager import Bot_Manager
 
 class Gin_Rummy(object):
     def __init__(self, player1, player2):
@@ -34,7 +35,7 @@ class Gin_Rummy(object):
         self.SMALLER_NUM_CARDS_PER_HAND = 7
 
         self.is_smaller_deck = False
-        #self.bot_manager = Bot_Manager()
+        self.bot_manager = Bot_Manager()
 
     def start_new_game(self, with_smaller_deck=True):
         self.is_smaller_deck = with_smaller_deck
@@ -77,9 +78,7 @@ class Gin_Rummy(object):
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("draw", "Super_Simple_CFR", self)
                 print("CFR chose: ", answer)
-                in_q.get()
             else:
-            
                 answer = in_q.get()
                 
             answering = answer.lower() == "random" or answer.lower() == "discard"
@@ -89,6 +88,7 @@ class Gin_Rummy(object):
             self.drawing_from_discard = False
             print("You drew: ", player.hand.cards[-1])
         else:
+            self.bot_manager.known_cards.append(self.discard_pile[-1])
             player.hand.add(self.discard_pile.pop())
             self.drawing_from_discard = True
 
@@ -97,7 +97,13 @@ class Gin_Rummy(object):
         check_if_int = False
         while check_if_int == False:
             # answer = input(f"Which card do you want to discard? (1-{self.SMALLER_NUM_CARDS_PER_HAND + 1 if self.is_smaller_deck else self.NORMAL_NUM_CARDS_PER_HAND + 1})")
-            answer = in_q.get()
+            if player.name == "CFR":
+                print("CFR is thinking...")
+                answer = self.bot_manager.get_action_from_bot("discard", "Super_Simple_CFR", self)
+                print("CFR chose: ", answer)
+            else:    
+                answer = in_q.get()
+
             check_if_int = True
             try:
                 int(answer)
@@ -173,6 +179,8 @@ class Gin_Rummy(object):
         self.deck.make_smaller_deck()
         self.deck.shuffle()
         self.deal()
+        self.bot_manager.known_cards = []
+        self.discard_pile = []
         self.discard_pile.append(self.deck.deal())
 
     def game_flow(self, in_q):

@@ -1,5 +1,6 @@
-from Game_State import Game_State
-from Gin_Oracle import Gin_Oracle
+#from Game_State import Game_State
+#from Gin_Oracle import Gin_Oracle
+from copy import deepcopy
 from Node import Node
 import pandas as pd
 
@@ -30,14 +31,15 @@ class Super_Simple_CFR:
         if stage == "draw":
             #Important that theese strategies are in the same order as it is in the game_state
             self.strategies = pd.DataFrame({"discard": [0], "random": [0]})
-            print("Strategies: ", self.strategies)
-            print("Strategies columns: ", self.strategies.columns)
+            #print("Strategies: ", self.strategies)
+            #print("Strategies columns: ", self.strategies.columns)
         elif stage == "discard":
             if smallDeck:
-                cards_names = root.game_state.main_player_hand.cards
-                for i in range(len(cards_names)):
-                    cards_names[i] = cards_names[i].__str__()
-                self.strategies = pd.DataFrame(columns = root.game_state.main_player_hand.cards, index = list(range(len(root.children)))).fillna(0)
+                cards_names = []
+                cards = root.game_state.main_player_hand.cards
+                for i in range(len(cards)):
+                    cards_names.append(cards[i].__str__())
+                self.strategies = pd.DataFrame(columns = cards_names, index = list(range(len(root.children)))).fillna(0)
 
         #print("Children count: ", root.children_count)
         #for i in range(iterations):
@@ -109,7 +111,7 @@ class Super_Simple_CFR:
         #print("Total expected utility: ", tot_exp_utility)
         return tot_exp_utility
 
-def main():
+"""def main():
     oracle = Gin_Oracle()
     #game.start_new_game()
     #start_state = Game_State(game, "draw")
@@ -124,4 +126,4 @@ def main():
     print("Best", best)
         
 if __name__ == "__main__":
-        main()
+        main()"""

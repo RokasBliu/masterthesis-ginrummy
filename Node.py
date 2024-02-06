@@ -23,7 +23,7 @@ class Node:
             child.game_state.draw_from_discard_pile()
 
             self.children.append(child)
-            child.game_state.print_state()
+            #child.game_state.print_state()
             #print("Depth: ", child.depth)
 
             #Draw from deck
@@ -43,7 +43,7 @@ class Node:
             child = Node(new_state, self)
             child.game_state.draw_card()
             self.children.append(child)
-            child.game_state.print_state()
+            #child.game_state.print_state()
             #print("Depth: ", child.depth)
         
         elif self.game_state.state == "discard":

@@ -1,5 +1,5 @@
 import random
-from Gin_Rummy import Gin_Rummy
+#from Gin_Rummy import Gin_Rummy
 from Hand import Hand
 from Deck import Deck
 from copy import deepcopy
@@ -147,7 +147,7 @@ class Gin_Oracle:
         #TODO - implement
         return False
     
-    def create_random_game(self):
+    """def create_random_game(self):
         player1 = Player("Player 1")
         player2 = Player("Player 2")
         game = Gin_Rummy(player1, player2)
@@ -170,6 +170,6 @@ class Gin_Oracle:
         if random_stage == "discard":
             game.players[game.turn_index].hand.add(game.deck.deal())
 
-        return game, known_cards, random_stage
+        return game, known_cards, random_stage"""
 
     
