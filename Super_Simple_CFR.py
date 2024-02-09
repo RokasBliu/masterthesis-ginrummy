@@ -79,6 +79,8 @@ class Super_Simple_CFR:
                 for i in range(len(utilities)):
                     u = utilities[i] * states[i].game_state.probability
                     best_utility += u
+                    #print("Best utility: ", best_utility)
+                    #print("Probability: ", states[i].game_state.probability)
                     
             return best_utility
         
@@ -95,7 +97,25 @@ class Super_Simple_CFR:
     def update_strategies(self):
         return
 
+    #TODO: test if this makes the bot better
     def basyian_update(self, node):
+        other_player_utilities = []
+        for i in range(len(node.children)):
+            state = node.children[i].game_state
+            other_player_utility = 0
+
+            for j in range(len(state.opponent_category_dist)):
+                other_player_utility += state.opponent_category_dist[j]
+            
+            other_player_utilities.append(other_player_utility)
+        
+        for i in range(len(node.children)):
+            state = node.children[i].game_state
+            tot_sum = sum(other_player_utilities)
+            if tot_sum == 0:
+                state.probability = 1/len(other_player_utilities)
+            else:
+                state.probability = other_player_utilities[i] / sum(other_player_utilities)
         return
 
 
