@@ -88,7 +88,7 @@ class Gin_Rummy(object):
             self.drawing_from_discard = False
             print("You drew: ", player.hand.cards[-1])
         else:
-            self.bot_manager.known_cards.append(self.discard_pile[-1])
+            self.bot_manager.add_known_card(self.discard_pile[-1], player)
             player.hand.add(self.discard_pile.pop())
             self.drawing_from_discard = True
 
@@ -175,6 +175,10 @@ class Gin_Rummy(object):
             p.player_discard = False
             p.player_knock = False
 
+            #A bit spaghetti, but it works
+            if p.name == "CFR":
+                p.is_human = False
+
         self.deck = Deck()
         self.deck.make_smaller_deck()
         self.deck.shuffle()
@@ -182,6 +186,7 @@ class Gin_Rummy(object):
         self.bot_manager.known_cards = []
         self.discard_pile = []
         self.discard_pile.append(self.deck.deal())
+        self.bot_manager.known_cards = []
 
     def game_flow(self, in_q):
         self.start_new_game(True)

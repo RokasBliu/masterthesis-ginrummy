@@ -101,13 +101,16 @@ class Super_Simple_CFR:
 
     def calculate_total_utility(self, node):
         #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
-        exp_p1_utility = self.best_possible_utility - node.game_state.main_player_expected_utility
+        main_player_exp_deadwood = node.game_state.oracle.get_expected_utility(node.game_state.main_player_hand)
+        exp_p1_utility = node.game_state.main_player_deadwood - main_player_exp_deadwood
         exp_p2_utility_dist = node.game_state.opponent_category_dist
         exp_p2_utility_sum = 0
         for i in range(len(exp_p2_utility_dist)):
             exp_p2_utility_sum += exp_p2_utility_dist[i]
 
         tot_exp_utility = exp_p1_utility - exp_p2_utility_sum
+        if tot_exp_utility < 0:
+            tot_exp_utility = 0
         #print("Total expected utility: ", tot_exp_utility)
         return tot_exp_utility
 

@@ -8,6 +8,7 @@ from Player import Player
 class Gin_Oracle:
     def __init__(self):
         #Making for smaller deck for now
+        self.deck = Deck().make_smaller_deck()
         self.close_valued_cards = {
             '5': ['6', '7', '8'],
             '6': ['5', '7', '8', '9'],
@@ -36,34 +37,35 @@ class Gin_Oracle:
             else:
                 determenistic_cards_hand.add(c)
         
-        expected_deadwood = self.get_avg_deadwood(phantom_cards, hand.deadwood, determenistic_cards_hand)
-        pc_utility = expected_deadwood - hand.deadwood
+        expected_deadwood = self.get_avg_deadwood(phantom_cards, determenistic_cards_hand)
+        #pc_utility = expected_deadwood - hand.deadwood
         #print("Determenistic deadwood: ", hand.deadwood)
         #print("Phantom card utility: ", pc_utility)
         #print("Expected utility: ", expected_deadwood)
         return expected_deadwood
     
     
-    def get_avg_deadwood(self, phantom_cards, determenistic_deadwood, hand):
+    def get_avg_deadwood(self, phantom_cards, hand):
         if len(phantom_cards) == 0:
-            return determenistic_deadwood
+            return hand.get_hand_score()
 
         else:
-            deck = Deck()
-            deck.make_smaller_deck()
             pc_utility = 0
-            for i in range(len(phantom_cards)):
-                for j in range(len(deck)):
+            for j in range(len(self.deck)):
 
-                    if phantom_cards[i].phantom_values[j] == 0:
-                        continue
+                if phantom_cards[0].phantom_values[j] == 0:
+                    continue
 
-                    temp_hand = deepcopy(hand)
-                    temp_hand.cards.append(deck[j])
+                temp_hand = deepcopy(hand)
+                temp_hand.cards.append(self.deck[j])
+
+                if len(phantom_cards) > 1:
+                    pc_utility += self.get_avg_deadwood(phantom_cards[1:], temp_hand)
+                    continue
                     #print("Temp hand: ", temp_hand)
-                    pc_utility += (phantom_cards[i].phantom_values[j] * temp_hand.get_hand_score())
+                pc_utility += (phantom_cards[0].phantom_values[j] * temp_hand.get_hand_score())
                      
-        return pc_utility/len(phantom_cards)
+        return pc_utility
     
     #I do not think this is needed
     def update_random_card_dist(self, player_hand, known_cards, discard_pile):
