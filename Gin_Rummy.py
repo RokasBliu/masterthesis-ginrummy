@@ -350,12 +350,15 @@ def pygame_display(game, out_q, window, clock, FPS):
         window.blit(player_2_score, (custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
 
         # Display game info
+        game_num = game.game_number
+        game_num_text = my_font.render(f"Game: {game_num + 1}", False, (0, 0, 0))
+        window.blit(game_num_text, (custom_window_placement[0], (custom_border_height - game_num_text.get_height()*2) / 2 + custom_window_placement[1]))
         round_num = game.round_number
-        round_num_text = my_font.render(f"Round: {round_num}", False, (0, 0, 0))
-        window.blit(round_num_text, (custom_window_placement[0], (custom_border_height - round_num_text.get_height()) / 2 + custom_window_placement[1]))
+        round_num_text = my_font.render(f"Round: {round_num + 1}", False, (0, 0, 0))
+        window.blit(round_num_text, (custom_window_placement[0], (custom_border_height) / 2 + custom_window_placement[1]))
         cards_left = len(game.deck)
         cards_left_text = my_font.render(f"Deck size: {cards_left}", False, (0, 0, 0))
-        window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()) / 2 + custom_window_placement[1]))
+        window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()*2) / 2 + custom_window_placement[1]))
 
         # Some logic where the player can interract with cards on the screen by clicking on them
         mouse_click_x, mouse_click_y = mouse_click_pos

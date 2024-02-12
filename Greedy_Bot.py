@@ -1,4 +1,5 @@
 import copy
+
 class Greedy_Bot:
     def __init__(self):
         self.actions = []
