@@ -1,4 +1,4 @@
-from Bot_manager import Bot_Manager
+from Bot_Manager import Bot_Manager
 from Deck import Deck
 from Player import Player
 from Hand import Hand
@@ -9,7 +9,6 @@ from Button import Button
 import threading
 import pygame
 import sys
-from Bot_manager import Bot_Manager
 
 class Gin_Rummy(object):
     def __init__(self, player1, player2):
@@ -72,12 +71,12 @@ class Gin_Rummy(object):
         while answering == False:
             print("Your hand: ", player.hand.sort_by_rank())
             print("Top of discard pile: ", self.discard_pile[-1])
-            # answer = input("Draw random or from discard?")
-            # answering = answer.lower() == "random" or answer.lower() == "discard"
             if player.name == "CFR":
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("draw", "Super_Simple_CFR", self)
                 print("CFR chose: ", answer)
+            elif player.name == "GreedyBot":
+                answer = self.bot_manager.get_action_from_bot("draw", "Greedy_Bot", self)
             else:
                 answer = in_q.get()
                 
@@ -96,11 +95,12 @@ class Gin_Rummy(object):
         print("Your hand: ", player.hand.sort_by_rank())
         check_if_int = False
         while check_if_int == False:
-            # answer = input(f"Which card do you want to discard? (1-{self.SMALLER_NUM_CARDS_PER_HAND + 1 if self.is_smaller_deck else self.NORMAL_NUM_CARDS_PER_HAND + 1})")
             if player.name == "CFR":
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("discard", "Super_Simple_CFR", self)
                 print("CFR chose: ", answer)
+            elif player.name == "GreedyBot":
+                answer = self.bot_manager.get_action_from_bot("discard", "Greedy_Bot", self)
             else:    
                 answer = in_q.get()
 
@@ -119,7 +119,13 @@ class Gin_Rummy(object):
             player.player_knock = True
             answering = False
             while answering == False:
-                knock_answer = in_q.get()
+                if player.name == "CFR":
+                    # For now we make that bots knock instantly
+                    knock_answer = "y"
+                elif player.name == "GreedyBot":
+                    knock_answer = "y"
+                else:  
+                    knock_answer = in_q.get()
                 answering = knock_answer.lower() == "y" or knock_answer.lower() == "n"
 
             if knock_answer.lower() == "y":
@@ -176,7 +182,7 @@ class Gin_Rummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR":
+            if p.name == "CFR" or p.name == "GreedyBot":
                 p.is_human = False
 
         self.deck = Deck()
@@ -217,8 +223,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "CFR", "Bot 2", "Bot 3"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "CFR", "Bot 2", "Bot 3"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR"], 200, 50)
 
 
         # Main menu loop

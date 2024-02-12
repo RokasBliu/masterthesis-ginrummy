@@ -1,6 +1,6 @@
 import copy
 class Greedy_Bot:
-    def __init__(self, game):
+    def __init__(self):
         self.actions = []
 
     def get_action(self, game_state):
@@ -15,21 +15,21 @@ class Greedy_Bot:
             temp_hand.add(game_state.top_card_discard_pile)
             discard_deadwood = temp_hand.get_hand_score()
             if discard_deadwood < hand_deadwood:
-                return "draw_discard"
+                return "discard"
             else:
-                return "draw_deck"
+                return "random"
         
         elif game_state.state == "discard":
-
-            best_card = None
-            best_index = 0
-            for i in range (len(hand)):
+            cards = hand.cards
+            best_index = cards.index(hand.cards[-1])
+            for i in range (len(cards)):
                 temp_hand = copy.deepcopy(hand)
-                temp_hand.remove(hand[i])
+                temp_hand.cards.remove(temp_hand.cards[i])
                 deadwood = temp_hand.get_hand_score()
                 if deadwood < best_deadwood:
                     best_deadwood = deadwood
-                    best_card = hand[i]
                     best_index = i
+            return best_index
         else:
-            return "knock"
+            # Instantly knock otherwise
+            return "y"
