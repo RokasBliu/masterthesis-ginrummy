@@ -20,16 +20,16 @@ class Greedy_Bot:
                 return "random"
         
         elif game_state.state == "discard":
-            cards = hand.cards
-            best_index = cards.index(hand.cards[-1])
-            for i in range (len(cards)):
+            best_index = 0
+            for i in range(len(hand.cards) - 1, -1, -1):
                 temp_hand = copy.deepcopy(hand)
                 temp_hand.cards.remove(temp_hand.cards[i])
                 deadwood = temp_hand.get_hand_score()
                 if deadwood < best_deadwood:
                     best_deadwood = deadwood
                     best_index = i
-            return best_index
+            print("Worst card: ", hand.cards[best_index])
+            return best_index + 1
         else:
             # Instantly knock otherwise
             return "y"

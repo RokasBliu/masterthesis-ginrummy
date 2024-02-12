@@ -22,7 +22,10 @@ class Gin_Rummy(object):
         self.game_over = True
         self.strike_one = False
         self.short_of_card = False
+
+        self.game_number = 0
         self.round_number = 0
+
         self.deck = []
         self.discard_pile = []
 
@@ -136,12 +139,8 @@ class Gin_Rummy(object):
                 player.player_draw = True
 
         self.turn_index = (self.turn_index + 1) % 2
-        if self.turn_index == 0:
-            self.round_number += 1
-
 
     def knock(self, player):
-        self.round_number += 1
         self.decline_round = False
         self.game_over = True
         self.strike_one = False
@@ -175,6 +174,7 @@ class Gin_Rummy(object):
             self.start_new_round()
 
     def start_new_round(self):
+        self.round_number += 1
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
