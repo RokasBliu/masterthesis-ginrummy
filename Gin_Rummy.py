@@ -78,6 +78,9 @@ class Gin_Rummy(object):
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("draw", "Super_Simple_CFR", self)
                 print("CFR chose: ", answer)
+            elif player.name == "Bot 2":
+                answer = self.bot_manager.get_action_from_bot("draw", "Greedy_Bot", self)
+                print("Bot 2 chose: ", answer)
             else:
                 answer = in_q.get()
                 
@@ -101,6 +104,9 @@ class Gin_Rummy(object):
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("discard", "Super_Simple_CFR", self)
                 print("CFR chose: ", answer)
+            elif player.name == "Bot 2":
+                answer = self.bot_manager.get_action_from_bot("discard", "Greedy_Bot", self)
+                print("Bot 2 chose: ", answer)
             else:    
                 answer = in_q.get()
 
