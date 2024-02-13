@@ -3,7 +3,7 @@ from Card import Card
 from Deck import Deck
 from Hand import Hand
 from Player import Player
-from Gin_Rummy import Gin_Rummy
+from GinRummy import GinRummy
 from queue import Queue
 
 class Test():
@@ -122,7 +122,7 @@ class Test():
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
 
-        game = Gin_Rummy(player1, player2)
+        game = GinRummy(player1, player2)
         game.start_new_game(False) # Start game with a normal sized deck
 
         assert game.players[0].name == "Test Player 1" and game.players[1].name == "Test Player 2", "Player names do not match"
@@ -134,7 +134,7 @@ class Test():
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
 
-        game = Gin_Rummy(player1, player2)
+        game = GinRummy(player1, player2)
         game.start_new_game(True) # Start game with a smaller deck
 
         assert game.players[0].name == "Test Player 1" and game.players[1].name == "Test Player 2", "Player names do not match"
@@ -151,7 +151,7 @@ class Test():
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
 
-        game = Gin_Rummy(player1, player2)
+        game = GinRummy(player1, player2)
         game.start_new_game(True) # Start game with a smaller deck
 
         assert game.players[0].name == "Test Player 1" and game.players[1].name == "Test Player 2", "Player names do not match"
@@ -181,7 +181,7 @@ class Test():
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
 
-        game = Gin_Rummy(player1, player2)
+        game = GinRummy(player1, player2)
         game.start_new_game(True) # Start game with a smaller deck
 
         assert game.players[0].name == "Test Player 1" and game.players[1].name == "Test Player 2", "Player names do not match"
@@ -215,7 +215,7 @@ class Test():
         player1 = Player("Test Player 1")
         player2 = Player("Test Player 2")
 
-        game = Gin_Rummy(player1, player2)
+        game = GinRummy(player1, player2)
         game.start_new_game(False)
 
         game.players[0].hand.cards = [Card("Spades", "5"),
