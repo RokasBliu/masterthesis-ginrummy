@@ -2,7 +2,7 @@ import copy
 
 class Greedy_Bot:
     def __init__(self):
-        self.actions = []
+        pass
 
     def get_action(self, game_state):
         assert game_state.main_player_index == game_state.turn_index
@@ -21,15 +21,16 @@ class Greedy_Bot:
                 return "random"
         
         elif game_state.state == "discard":
+
             best_index = 0
-            for i in range(len(hand.cards) - 1, -1, -1):
+            for i in range(len(hand.cards)):
                 temp_hand = copy.deepcopy(hand)
-                temp_hand.cards.remove(temp_hand.cards[i])
+                temp_hand.cards.remove(hand.cards[i])
                 deadwood = temp_hand.get_hand_score()
                 if deadwood < best_deadwood:
                     best_deadwood = deadwood
                     best_index = i
-            print("Worst card: ", hand.cards[best_index])
+            
             return best_index + 1
         else:
             # Instantly knock otherwise
