@@ -4,7 +4,7 @@ from copy import deepcopy
 from Node import Node
 import pandas as pd
 
-class Super_Simple_CFR:
+class SuperSimpleCFR:
     def __init__(self):
         self.strategies = None
         self.regret_sum = {}

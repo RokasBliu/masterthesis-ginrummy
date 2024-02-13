@@ -1,6 +1,6 @@
 import copy
 
-class Greedy_Bot:
+class GreedyBot:
     def __init__(self):
         pass
 

@@ -5,7 +5,7 @@ from Deck import Deck
 from copy import deepcopy
 
 from Player import Player
-class Gin_Oracle:
+class GinOracle:
     def __init__(self):
         #Making for smaller deck for now
         self.deck = Deck().make_smaller_deck()

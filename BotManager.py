@@ -1,10 +1,10 @@
-from Game_State import Game_State
-from Super_Simple_CFR import Super_Simple_CFR
-from Greedy_Bot import Greedy_Bot
-class Bot_Manager:
+from GameState import GameState
+from SuperSimpleCFR import SuperSimpleCFR
+from GreedyBot import GreedyBot
+class BotManager:
     def __init__(self):
         self.known_cards = []
-        self.bots = ["Super_Simple_CFR", "Greedy_Bot"]
+        self.bots = ["SuperSimpleCFR", "GreedyBot"]
         pass
     
     def check_if_bot_exists(self, bot):
@@ -18,14 +18,14 @@ class Bot_Manager:
             self.known_cards.append(card)
 
     def get_action_from_bot(self, stage, bot, game):
-        game_state = Game_State(game, stage, self.known_cards)
+        game_state = GameState(game, stage, self.known_cards)
 
-        if bot == "Super_Simple_CFR":
-            sscfr = Super_Simple_CFR()
+        if bot == "SuperSimpleCFR":
+            sscfr = SuperSimpleCFR()
             return sscfr.resolve(game_state, "end_game", 8, 1)
 
-        elif bot == "Greedy_Bot":
-            gb = Greedy_Bot()
+        elif bot == "GreedyBot":
+            gb = GreedyBot()
             return gb.get_action(game_state)
         else:
             print("Bot not found")
