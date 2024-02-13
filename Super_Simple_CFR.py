@@ -47,6 +47,8 @@ class Super_Simple_CFR:
         #self.strategies = self.update_strategies()
         print(self.strategies)
         best_strategy = self.strategies.idxmax(axis=1)[0]
+        if self.strategies.at[0, best_strategy] == 0:
+            best_strategy = "random"
         
         print("Best strategy: ", best_strategy)
 

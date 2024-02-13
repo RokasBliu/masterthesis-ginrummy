@@ -119,7 +119,10 @@ class Gin_Rummy(object):
             player.player_knock = True
             answering = False
             while answering == False:
-                knock_answer = in_q.get()
+                if player.name == "CFR":
+                    knock_answer = "y"
+                else:    
+                    knock_answer = in_q.get()
                 answering = knock_answer.lower() == "y" or knock_answer.lower() == "n"
 
             if knock_answer.lower() == "y":
