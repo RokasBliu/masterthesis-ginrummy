@@ -10,15 +10,15 @@ class GinOracle:
         #Making for smaller deck for now
         self.deck = Deck().make_smaller_deck()
         self.close_valued_cards = {
-            '5': ['6', '7', '8'],
-            '6': ['5', '7', '8', '9'],
-            '7': ['5', '6', '8', '9', '10'],
-            '8': ['5', '6', '7', '9', 'Jack', 'Queen'],
-            '9': ['6', '7', '8', '10', 'Jack', 'Queen', 'King'],
-            '10': ['7', '8', '9', 'Jack', 'Queen', 'King'],
-            'Jack': ['8', '9', '10', 'Queen', 'King'],
-            'Queen': ['9', '10', 'Jack', 'King'],
-            'King': ['10', 'Jack', 'Queen']
+            '5': ['6', '7'],
+            '6': ['5', '7', '8'],
+            '7': ['5', '6', '8', '9'],
+            '8': ['6', '7', '9', '10'],
+            '9': ['7', '8', '10', 'Jack'],
+            '10': ['8', '9', 'Jack', 'Queen'],
+            'Jack': ['9', '10', 'Queen', 'King'],
+            'Queen': ['10', 'Jack', 'King'],
+            'King': ['Jack', 'Queen']
         }
         self.low_valued_cards = ['5', '6', '7']
         self.deck = Deck()
@@ -111,10 +111,12 @@ class GinOracle:
                         category_dist[0] += 5
                         category_dist[2] += 2
                         category_dist[4] += 1
-                    if c.value in self.close_valued_cards[card_drawn.value]:
-                        category_dist[1] += 5
-                        category_dist[2] += 2
-                        category_dist[4] += 1
+                    
+                    if c.suit == card_drawn.suit:
+                        if c.value in self.close_valued_cards[card_drawn.value]:
+                            category_dist[1] += 5
+                            category_dist[2] += 2
+                            category_dist[4] += 1
 
             if card_drawn.value in self.low_valued_cards:
                 category_dist[2] += 1
@@ -140,7 +142,6 @@ class GinOracle:
         
         return False
 
-        return category_dist
     
     def check_for_sequence(self, hand):
         #TODO - implement

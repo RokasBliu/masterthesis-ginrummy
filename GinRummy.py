@@ -83,7 +83,9 @@ class GinRummy(object):
                 print("Bot 2 chose: ", answer)
             else:
                 answer = in_q.get()
-                
+                if answer == "discard":
+                    self.bot_manager.add_known_card(self.discard_pile[-1], player)
+
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
         if answer.lower() == "random":
@@ -91,7 +93,6 @@ class GinRummy(object):
             self.drawing_from_discard = False
             print("You drew: ", player.hand.cards[-1])
         else:
-            self.bot_manager.add_known_card(self.discard_pile[-1], player)
             player.hand.add(self.discard_pile.pop())
             self.drawing_from_discard = True
 
@@ -108,6 +109,7 @@ class GinRummy(object):
                 print("Bot 2 chose: ", answer)
             else:    
                 answer = in_q.get()
+                self.bot_manager.remove_known_card(player.hand.cards[int(answer)-1])
 
             check_if_int = True
             try:

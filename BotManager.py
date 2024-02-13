@@ -17,6 +17,10 @@ class BotManager:
         if player.is_human:
             self.known_cards.append(card)
 
+    def remove_known_card(self, card):
+        if card in self.known_cards:
+            self.known_cards.remove(card)
+
     def get_action_from_bot(self, stage, bot, game):
         game_state = GameState(game, stage, self.known_cards)
 
