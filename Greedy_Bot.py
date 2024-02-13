@@ -1,4 +1,5 @@
 import copy
+
 class Greedy_Bot:
     def __init__(self):
         pass
@@ -32,4 +33,5 @@ class Greedy_Bot:
             
             return best_index + 1
         else:
-            return "knock"
+            # Instantly knock otherwise
+            return "y"

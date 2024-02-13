@@ -1,4 +1,4 @@
-from Bot_manager import Bot_Manager
+from BotManager import Bot_Manager
 from Deck import Deck
 from Player import Player
 from Hand import Hand
@@ -9,7 +9,6 @@ from Button import Button
 import threading
 import pygame
 import sys
-from Bot_manager import Bot_Manager
 
 class Gin_Rummy(object):
     def __init__(self, player1, player2):
@@ -23,7 +22,10 @@ class Gin_Rummy(object):
         self.game_over = True
         self.strike_one = False
         self.short_of_card = False
+
+        self.game_number = 0
         self.round_number = 0
+
         self.deck = []
         self.discard_pile = []
 
@@ -72,8 +74,6 @@ class Gin_Rummy(object):
         while answering == False:
             print("Your hand: ", player.hand.sort_by_rank())
             print("Top of discard pile: ", self.discard_pile[-1])
-            # answer = input("Draw random or from discard?")
-            # answering = answer.lower() == "random" or answer.lower() == "discard"
             if player.name == "CFR":
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("draw", "Super_Simple_CFR", self)
@@ -99,7 +99,6 @@ class Gin_Rummy(object):
         print("Your hand: ", player.hand.sort_by_rank())
         check_if_int = False
         while check_if_int == False:
-            # answer = input(f"Which card do you want to discard? (1-{self.SMALLER_NUM_CARDS_PER_HAND + 1 if self.is_smaller_deck else self.NORMAL_NUM_CARDS_PER_HAND + 1})")
             if player.name == "CFR":
                 print("CFR is thinking...")
                 answer = self.bot_manager.get_action_from_bot("discard", "Super_Simple_CFR", self)
@@ -126,8 +125,11 @@ class Gin_Rummy(object):
             answering = False
             while answering == False:
                 if player.name == "CFR":
+                    # For now we make that bots knock instantly
                     knock_answer = "y"
-                else:    
+                elif player.name == "GreedyBot":
+                    knock_answer = "y"
+                else:  
                     knock_answer = in_q.get()
                 answering = knock_answer.lower() == "y" or knock_answer.lower() == "n"
 
@@ -139,12 +141,8 @@ class Gin_Rummy(object):
                 player.player_draw = True
 
         self.turn_index = (self.turn_index + 1) % 2
-        if self.turn_index == 0:
-            self.round_number += 1
-
 
     def knock(self, player):
-        self.round_number += 1
         self.decline_round = False
         self.game_over = True
         self.strike_one = False
@@ -178,6 +176,7 @@ class Gin_Rummy(object):
             self.start_new_round()
 
     def start_new_round(self):
+        self.round_number += 1
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
@@ -185,7 +184,7 @@ class Gin_Rummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR":
+            if p.name == "CFR" or p.name == "GreedyBot":
                 p.is_human = False
 
         self.deck = Deck()
@@ -226,8 +225,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "CFR", "Bot 2", "Bot 3"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "CFR", "Bot 2", "Bot 3"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR"], 200, 50)
 
 
         # Main menu loop
@@ -353,12 +352,15 @@ def pygame_display(game, out_q, window, clock, FPS):
         window.blit(player_2_score, (custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
 
         # Display game info
+        game_num = game.game_number
+        game_num_text = my_font.render(f"Game: {game_num + 1}", False, (0, 0, 0))
+        window.blit(game_num_text, (custom_window_placement[0], (custom_border_height - game_num_text.get_height()*2) / 2 + custom_window_placement[1]))
         round_num = game.round_number
-        round_num_text = my_font.render(f"Round: {round_num}", False, (0, 0, 0))
-        window.blit(round_num_text, (custom_window_placement[0], (custom_border_height - round_num_text.get_height()) / 2 + custom_window_placement[1]))
+        round_num_text = my_font.render(f"Round: {round_num + 1}", False, (0, 0, 0))
+        window.blit(round_num_text, (custom_window_placement[0], (custom_border_height) / 2 + custom_window_placement[1]))
         cards_left = len(game.deck)
         cards_left_text = my_font.render(f"Deck size: {cards_left}", False, (0, 0, 0))
-        window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()) / 2 + custom_window_placement[1]))
+        window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()*2) / 2 + custom_window_placement[1]))
 
         # Some logic where the player can interract with cards on the screen by clicking on them
         mouse_click_x, mouse_click_y = mouse_click_pos
