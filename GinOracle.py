@@ -38,10 +38,6 @@ class GinOracle:
                 determenistic_cards_hand.add(c)
         
         expected_deadwood = self.get_avg_deadwood(phantom_cards, determenistic_cards_hand)
-        #pc_utility = expected_deadwood - hand.deadwood
-        #print("Determenistic deadwood: ", hand.deadwood)
-        #print("Phantom card utility: ", pc_utility)
-        #print("Expected utility: ", expected_deadwood)
         return expected_deadwood
     
     
@@ -99,30 +95,31 @@ class GinOracle:
                 return category_dist
             if len(opponent_known_cards) > 0:
                 #Check if know cards can make a meld with the card drawn
-                if len(opponent_known_cards) > 2:
-                    hasMeld = self.check_for_meld_equal_cards(opponent_known_cards)
-                    if hasMeld:
+                #TODO test if this is a good idea, may be uneccesary
+                """if len(opponent_known_cards) > 2:
+                    hasMeld_equal_cards = self.check_for_meld_equal_cards(opponent_known_cards)
+                    if hasMeld_equal_cards:
                         category_dist[0] = 10
-                        category_dist[2] += 2
-                        category_dist[4] += 1
+                        category_dist[2] += 5
+                        category_dist[4] += 2"""
 
                     #hasSequence = self.check_for_sequence(opponent_known_cards)
 
                 for c in opponent_known_cards:
                     #print("Card drawn: ", card_drawn.value, " Card in hand: ", c.value)
                     if c.value == card_drawn.value:
-                        category_dist[0] += 1
-                        category_dist[2] += 0.2
-                        category_dist[4] += 0.1     
+                        category_dist[0] += 5
+                        category_dist[2] += 2
+                        category_dist[4] += 1
                     if c.value in self.close_valued_cards[card_drawn.value]:
-                        category_dist[1] += 1
-                        category_dist[2] += 0.2
-                        category_dist[4] += 0.1
+                        category_dist[1] += 5
+                        category_dist[2] += 2
+                        category_dist[4] += 1
 
             if card_drawn.value in self.low_valued_cards:
-                category_dist[2] += 0.2
-                category_dist[3] += 0.2
-                category_dist[4] += 0.1
+                category_dist[2] += 1
+                category_dist[3] += 2
+                category_dist[4] += 1
             
             category_dist[5] += 1
         

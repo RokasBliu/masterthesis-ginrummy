@@ -1,6 +1,5 @@
 #from Game_State import Game_State
 #from Gin_Oracle import Gin_Oracle
-from copy import deepcopy
 from Node import Node
 import pandas as pd
 
