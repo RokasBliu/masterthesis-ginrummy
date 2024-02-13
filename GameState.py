@@ -1,9 +1,9 @@
 from Deck import Deck
 from Card import Card
-from Gin_Oracle import Gin_Oracle
+from GinOracle import GinOracle
 from Action import Action
 import numpy as np
-class Game_State(object):
+class GameState(object):
     def __init__(self, game, state, opponent_known_cards=[]):
         self.main_player = game.players[game.turn_index]
         self.main_player_index = game.turn_index
@@ -29,7 +29,7 @@ class Game_State(object):
         self.opponent_known_cards = opponent_known_cards
         self.opponent_category_dist = np.zeros(7) #TODO: Make this more accurate
         self.rand_card_dist = []
-        self.oracle = Gin_Oracle()
+        self.oracle = GinOracle()
         self.action = None
 
         #Calculate random cards available

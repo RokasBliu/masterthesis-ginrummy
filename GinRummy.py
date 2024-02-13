@@ -1,4 +1,4 @@
-from BotManager import Bot_Manager
+from BotManager import BotManager
 from Deck import Deck
 from Player import Player
 from Hand import Hand
@@ -10,7 +10,7 @@ import threading
 import pygame
 import sys
 
-class Gin_Rummy(object):
+class GinRummy(object):
     def __init__(self, player1, player2):
         #self.thread = threading
         self.players = [player1, player2]
@@ -37,7 +37,7 @@ class Gin_Rummy(object):
         self.SMALLER_NUM_CARDS_PER_HAND = 7
 
         self.is_smaller_deck = False
-        self.bot_manager = Bot_Manager()
+        self.bot_manager = BotManager()
 
     def start_new_game(self, with_smaller_deck=True):
         self.is_smaller_deck = with_smaller_deck
@@ -76,10 +76,10 @@ class Gin_Rummy(object):
             print("Top of discard pile: ", self.discard_pile[-1])
             if player.name == "CFR":
                 print("CFR is thinking...")
-                answer = self.bot_manager.get_action_from_bot("draw", "Super_Simple_CFR", self)
+                answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
                 print("CFR chose: ", answer)
-            elif player.name == "Bot 2":
-                answer = self.bot_manager.get_action_from_bot("draw", "Greedy_Bot", self)
+            elif player.name == "GreedyBot":
+                answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
             else:
                 answer = in_q.get()
@@ -101,10 +101,10 @@ class Gin_Rummy(object):
         while check_if_int == False:
             if player.name == "CFR":
                 print("CFR is thinking...")
-                answer = self.bot_manager.get_action_from_bot("discard", "Super_Simple_CFR", self)
+                answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
                 print("CFR chose: ", answer)
-            elif player.name == "Bot 2":
-                answer = self.bot_manager.get_action_from_bot("discard", "Greedy_Bot", self)
+            elif player.name == "GreedyBot":
+                answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
             else:    
                 answer = in_q.get()
@@ -460,7 +460,7 @@ def main():
     player1 = Player(p1_name[0])
     player2 = Player(p2_name[0])
 
-    game = Gin_Rummy(player1, player2)
+    game = GinRummy(player1, player2)
 
     q = Queue() # used for communicating between threads
 
