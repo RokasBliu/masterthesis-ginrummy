@@ -1,5 +1,6 @@
 #from Game_State import Game_State
 #from Gin_Oracle import Gin_Oracle
+import random
 from Node import Node
 import pandas as pd
 
@@ -47,8 +48,15 @@ class SuperSimpleCFR:
         print(self.strategies)
         best_strategy = self.strategies.idxmax(axis=1)[0]
         if self.strategies.at[0, best_strategy] == 0:
-            best_strategy = "random"
-        
+            if stage == "draw":
+                best_strategy = "random"
+            else:
+            #Choose a random card to discard
+                random_index = random.randint(0, len(root.children) - 1)
+                best_strategy = self.strategies.columns[random_index]
+
+        random_index = random.randint(0, len(root.children) - 1)
+        print("Random strategy:", self.strategies.columns[random_index])
         print("Best strategy: ", best_strategy)
 
         if stage == "discard":
