@@ -1,3 +1,4 @@
+from LookupTable import LookupTable
 class Hand(object):
     def __init__(self):
         self.cards = []
@@ -8,7 +9,7 @@ class Hand(object):
                    'Jack': 11, 'Queen': 12, 'King': 13}
         self.card_values = {'Ace': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 
                'Jack': 10, 'Queen': 10, 'King': 10}
-        
+        self.lookup_table = LookupTable()
         # Sort instantly when the hand is created
         self.sort_by_rank()
     
