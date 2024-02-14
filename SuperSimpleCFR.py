@@ -31,8 +31,6 @@ class SuperSimpleCFR:
         if stage == "draw":
             #Important that theese strategies are in the same order as it is in the game_state
             self.strategies = pd.DataFrame({"discard": [0], "random": [0]})
-            #print("Strategies: ", self.strategies)
-            #print("Strategies columns: ", self.strategies.columns)
         elif stage == "discard":
             if smallDeck:
                 cards_names = []
@@ -41,7 +39,6 @@ class SuperSimpleCFR:
                     cards_names.append(cards[i].__str__())
                 self.strategies = pd.DataFrame(columns = cards_names, index = list(range(len(root.children)))).fillna(0)
 
-        #print("Children count: ", root.children_count)
         #for i in range(iterations):
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
@@ -54,9 +51,7 @@ class SuperSimpleCFR:
             #Choose a random card to discard
                 random_index = random.randint(0, len(root.children) - 1)
                 best_strategy = self.strategies.columns[random_index]
-
-        random_index = random.randint(0, len(root.children) - 1)
-        print("Random strategy:", self.strategies.columns[random_index])
+                
         print("Best strategy: ", best_strategy)
 
         if stage == "discard":
