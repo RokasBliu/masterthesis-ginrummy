@@ -5,6 +5,7 @@ from Hand import Hand
 from Player import Player
 from GinRummy import GinRummy
 from queue import Queue
+import pytest
 
 class Test():
     def test_card_in_two_melds_edgecase(self):
@@ -19,7 +20,7 @@ class Test():
                         Card("Hearts", "King")]
 
         hand.sort_by_rank()
-        score = hand.get_hand_score()
+        score = hand.get_hand_score_optimized()
 
         assert score == 10, f"Hand score (deadwood) should be 10, got {score}"
 
@@ -36,7 +37,7 @@ class Test():
                         Card("Hearts", "King")]
 
         hand.sort_by_rank()
-        score = hand.get_hand_score()
+        score = hand.get_hand_score_optimized()
 
         assert score == 22, f"Hand score (deadwood) should be 22, got {score}"
 
@@ -53,7 +54,7 @@ class Test():
                         Card("Hearts", "Jack")]
 
         hand.sort_by_rank()
-        score = hand.get_hand_score()
+        score = hand.get_hand_score_optimized()
 
         assert score == 0, f"Hand score (deadwood) should be 0, got {score}"
 
@@ -70,13 +71,13 @@ class Test():
                         Card("Hearts", "King")]
         
         hand.sort_by_rank()
-        score = hand.get_hand_score()
+        score = hand.get_hand_score_optimized()
 
         assert len(hand.cards) == 7, f"Amount of cards in hand should be 7, got {len(hand.cards)}"
         assert score == 10, f"Hand score (deadwood) should be 10, got {score}"
 
         hand.add(Card("Hearts", "9"))
-        score = hand.get_hand_score()
+        score = hand.get_hand_score_optimized()
 
         assert len(hand.cards) == 8, f"Amount of cards in hand should be 8, got {len(hand.cards)}"
         assert score == 19, f"Hand score (deadwood) should be 19, got {score}"

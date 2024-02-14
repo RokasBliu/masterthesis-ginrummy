@@ -35,9 +35,180 @@ class Hand(object):
         
         return self.cards
 
+    def sort_by_suit(self):
+        self.cards.sort(key=lambda card: card.suit)
+
+    #We need to sort by suits, and get both the suits and the values in a tuple
+    def get_hand_suits_tuples(self):
+        hand_sorted_suit = sorted(self.cards, key=lambda card: card.suit)
+        tuple_suits_suits = tuple()
+        tuple_values = tuple()
+
+        for card in hand_sorted_suit:
+            tuple_suits_suits += (card.suit,)
+            tuple_values += (card.value,)
+
+        return tuple_suits_suits, tuple_values
+        
+    def get_hand_values_tuple(self):
+        hand_sorted_values = sorted(self.cards, key=lambda card: self.get_card_rank(card.value))
+        tuple_values = tuple()
+
+        for card in hand_sorted_values:
+            tuple_values += (card.value,)
+        
+        return tuple_values
+    
     def get_card_rank(self, card_value):
         return self.rank_converter[card_value]
     
+    def get_hand_score_optimized(self):
+        self.deadwood = 0
+        self.melds = []
+        self.meld_id_counter = 0
+
+        #Get the tuples, sorted by suits and values
+        #The tuple sorted by suits needs both the suits and the values
+        tuple_suits_suits, tuple_suits_values = self.get_hand_suits_tuples()
+        tuple_values = self.get_hand_values_tuple()
+
+        print("Tuple suits", tuple_suits_suits)
+        print("Tuple values", tuple_suits_values)
+        print("Tuple values", tuple_values)
+        # Check for straights
+        self.sort_by_suit()
+        i = 0
+        j = 3
+
+        has_straight_three = False
+        has_straight_four = False
+        has_straight_five = False
+        has_straight_six = False
+
+        while j <= len(self.cards):
+            print("Tuple values", tuple_suits_suits[i:j])
+            if self.lookup_table.flush_three.get(tuple_suits_suits[i:j], 0):
+                print("Flush three", tuple_suits_suits[i:j])
+                if self.lookup_table.straight_three.get(tuple_suits_values[i:j], 0):
+                    cards_to_add = self.cards[i:j]
+                    for c in cards_to_add:
+                        c.meld_ids.append(self.meld_id_counter)
+                    self.melds.append(self.cards[i:j])
+                    self.meld_id_counter += 1
+                    has_straight_three = True
+            i += 1
+            j += 1
+        
+        if has_straight_three:
+            i = 0
+            j = 4
+            while j <= len(self.cards):
+                if self.lookup_table.flush_four.get(tuple_suits_suits[i:j], 0):
+                    if self.lookup_table.straight_four.get(tuple_suits_values[i:j], 0):
+                        cards_to_add = self.cards[i:j]
+                        for c in cards_to_add:
+                            c.meld_ids.append(self.meld_id_counter)
+                        self.melds.append(self.cards[i:j])
+                        self.meld_id_counter += 1
+                        has_straight_four = True
+                i += 1
+                j += 1
+        
+        if has_straight_four:
+            i = 0
+            j = 5
+            while j <= len(self.cards):
+                if self.lookup_table.flush_five.get(tuple_suits_suits[i:j], 0):
+                    if self.lookup_table.straight_five.get(tuple_suits_values[i:j], 0):
+                        cards_to_add = self.cards[i:j]
+                        for c in cards_to_add:
+                            c.meld_ids.append(self.meld_id_counter)
+                        self.melds.append(self.cards[i:j])
+                        self.meld_id_counter += 1
+                        has_straight_five = True
+                i += 1
+                j += 1
+        
+        if has_straight_five:
+            i = 0
+            j = 6
+            while j <= len(self.cards):
+                if self.lookup_table.flush_six.get(tuple_suits_suits[i:j], 0):
+                    if self.lookup_table.straight_six.get(tuple_suits_values[i:j], 0):
+                        cards_to_add = self.cards[i:j]
+                        for c in cards_to_add:
+                            c.meld_ids.append(self.meld_id_counter)
+                        self.melds.append(self.cards[i:j])
+                        self.meld_id_counter += 1
+                        has_straight_six = True
+                i += 1
+                j += 1
+        
+        if has_straight_six:
+            i = 0
+            j = 7
+            while j <= len(self.cards):
+                if self.lookup_table.flush_seven.get(tuple_suits_suits[i:j], 0):
+                    if self.lookup_table.straight_seven.get(tuple_suits_values[i:j], 0):
+                        cards_to_add = self.cards[i:j]
+                        for c in cards_to_add:
+                            c.meld_ids.append(self.meld_id_counter)
+                        self.melds.append(self.cards[i:j])
+                        self.meld_id_counter += 1
+                i += 1
+                j += 1
+        
+        # Check for equal cards
+        self.sort_by_rank()
+        i = 0
+        j = 3
+        has_three_of_a_kind = False
+        while j <= len(self.cards):
+            if self.lookup_table.three_of_a_kind.get(tuple_values[i:j]):
+                cards_to_add = self.cards[i:j]
+                for c in cards_to_add:
+                    c.meld_ids.append(self.meld_id_counter)
+                self.melds.append(self.cards[i:j])
+                self.meld_id_counter += 1
+                has_three_of_a_kind = True
+            i += 1
+            j += 1
+
+        if has_three_of_a_kind:
+            i = 0
+            j = 4
+            while j <= len(self.cards):
+                if self.lookup_table.four_of_a_kind.get(tuple_values[i:j]):
+                    cards_to_add = self.cards[i:j]
+                    for c in cards_to_add:
+                        c.meld_ids.append(self.meld_id_counter)
+                    self.melds.append(self.cards[i:j])
+                    self.meld_id_counter += 1
+                i += 1
+                j += 1
+        
+        best_meld = self.find_best_meld()            
+        
+        if best_meld == None:
+            for c in self.cards:
+                self.deadwood += self.card_values[c.value]
+
+        else:
+            for c in self.cards:
+                if c not in best_meld:
+                    self.deadwood += self.card_values[c.value]
+
+        print("------------------")
+        print("Cards", self.cards)
+        print("melds", self.melds)
+        print("Best meld", best_meld)
+        print("Deadwood:", self.deadwood)
+        return self.deadwood
+    
+    def check_lookup_table(self, lookup_table, i, j, tuple_values = None, tuple_suits_suits = None):
+        #TODO: Implement this, makes the code more readable
+        pass
+
     ##TODO: Optimaliser denne
     def get_hand_score(self):
         self.deadwood = 0

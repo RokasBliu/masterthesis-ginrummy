@@ -87,36 +87,36 @@ class LookupTable:
         }
 
         self.flush_three = {
-            ("Hearts", "Hearts", "Hearts"): 0,
-            ("Clubs", "Clubs", "Clubs"): 0,
-            ("Spades", "Spades", "Spades"): 0,
-            ("Diamonds", "Diamonds", "Diamonds"): 0
+            ('Hearts', 'Hearts', 'Hearts'): 1,
+            ('Clubs', 'Clubs', 'Clubs'): 1,
+            ('Spades', 'Spades', 'Spades'): 1,
+            ('Diamonds', 'Diamonds', 'Diamonds'): 1
         }
 
         self.flush_four = {
-            ("Hearts", "Hearts", "Hearts", "Hearts"): 0,
-            ("Clubs", "Clubs", "Clubs", "Clubs"): 0,
-            ("Spades", "Spades", "Spades", "Spades"): 0,
-            ("Diamonds", "Diamonds", "Diamonds", "Diamonds"): 0
+            ('Hearts', 'Hearts', 'Hearts', 'Hearts'): 2,
+            ('Clubs', 'Clubs', 'Clubs', 'Clubs'): 2,
+            ('Spades', 'Spades', 'Spades', 'Spades'): 2,
+            ('Diamonds', 'Diamonds', 'Diamonds', 'Diamonds'): 2
         }
 
         self.flush_five = {
-            ("Hearts", "Hearts", "Hearts", "Hearts", "Hearts"): 0,
-            ("Clubs", "Clubs", "Clubs", "Clubs", "Clubs"): 0,
-            ("Spades", "Spades", "Spades", "Spades", "Spades"): 0,
-            ("Diamonds", "Diamonds", "Diamonds", "Diamonds", "Diamonds"): 0
+            ('Hearts', 'Hearts', 'Hearts', 'Hearts', 'Hearts'): 3,
+            ('Clubs', 'Clubs', 'Clubs', 'Clubs', 'Clubs'): 3,
+            ('Spades', 'Spades', 'Spades', 'Spades', 'Spades'): 3,
+            ('Diamonds', 'Diamonds', 'Diamonds', 'Diamonds', 'Diamonds'): 3
         }
 
         self.flush_six = {
-            ("Hearts", "Hearts", "Hearts", "Hearts", "Hearts", "Hearts"): 0,
-            ("Clubs", "Clubs", "Clubs", "Clubs", "Clubs", "Clubs"): 0,
-            ("Spades", "Spades", "Spades", "Spades", "Spades", "Spades"): 0,
-            ("Diamonds", "Diamonds", "Diamonds", "Diamonds", "Diamonds", "Diamonds"): 0
+            ('Hearts', 'Hearts', 'Hearts', 'Hearts', 'Hearts', 'Hearts'): 4,
+            ('Clubs', 'Clubs', 'Clubs', 'Clubs', 'Clubs', 'Clubs'): 4,
+            ('Spades', 'Spades', 'Spades', 'Spades', 'Spades', 'Spades'): 4,
+            ('Diamonds', 'Diamonds', 'Diamonds', 'Diamonds', 'Diamonds', 'Diamonds'): 4
         }
 
         self.flush_seven = {
-            ("Hearts", "Hearts", "Hearts", "Hearts", "Hearts", "Hearts", "Hearts"): 0,
-            ("Clubs", "Clubs", "Clubs", "Clubs", "Clubs", "Clubs", "Clubs"): 0,
-            ("Spades", "Spades", "Spades", "Spades", "Spades", "Spades", "Spades"): 0,
-            ("Diamonds", "Diamonds", "Diamonds", "Diamonds", "Diamonds", "Diamonds", "Diamonds"): 0
+            ('Hearts', 'Hearts', 'Hearts', 'Hearts', 'Hearts', 'Hearts', 'Hearts'): 5,
+            ('Clubs', 'Clubs', 'Clubs', 'Clubs', 'Clubs', 'Clubs', 'Clubs'): 5,
+            ('Spades', 'Spades', 'Spades', 'Spades', 'Spades', 'Spades', 'Spades'): 5,
+            ('Diamonds', 'Diamonds', 'Diamonds', 'Diamonds', 'Diamonds', 'Diamonds', 'Diamonds'): 5
         }

@@ -122,7 +122,7 @@ class GinRummy(object):
         self.discard_pile.append(card)
         self.drawing_from_discard = False
 
-        if player.hand.get_hand_score() <= 10:
+        if player.hand.get_hand_score_optimized() <= 10:
             player.player_knock = True
             answering = False
             while answering == False:
