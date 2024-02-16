@@ -17,7 +17,8 @@ class GameState(object):
         self.state = state
         self.probability = 1
 
-        self.main_player_deadwood = self.main_player.hand.get_hand_score()
+        self.hand_evaluator = game.hand_evaluator
+        self.main_player_deadwood = self.hand_evaluator.get_hand_score(self.main_player_hand)
         self.main_player_expected_utility = self.main_player_deadwood
         self.main_player_score = self.main_player.score
 

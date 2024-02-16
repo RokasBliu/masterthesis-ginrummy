@@ -1,5 +1,6 @@
 from BotManager import BotManager
 from Deck import Deck
+from HandEvaluator import HandEvaluator
 from Player import Player
 from Hand import Hand
 from queue import Queue
@@ -38,6 +39,7 @@ class GinRummy(object):
 
         self.is_smaller_deck = False
         self.bot_manager = BotManager()
+        self.hand_evaluator = HandEvaluator()
 
     def start_new_game(self, with_smaller_deck=True):
         self.is_smaller_deck = with_smaller_deck
@@ -122,7 +124,7 @@ class GinRummy(object):
         self.discard_pile.append(card)
         self.drawing_from_discard = False
 
-        if player.hand.get_hand_score_optimized() <= 10:
+        if self.hand_evaluator.get_hand_score(player.hand) <= 10:
             player.player_knock = True
             answering = False
             while answering == False:

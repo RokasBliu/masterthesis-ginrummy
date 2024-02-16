@@ -3,6 +3,7 @@ import random
 from Hand import Hand
 from Deck import Deck
 from copy import deepcopy
+from HandEvaluator import HandEvaluator
 
 from Player import Player
 class GinOracle:
@@ -23,6 +24,7 @@ class GinOracle:
         self.low_valued_cards = ['5', '6', '7']
         self.deck = Deck()
         self.deck.make_smaller_deck()
+        self.hand_evaluator = HandEvaluator()
         pass
 
     #TODO - Implement get expected value from hand with phantom cards
@@ -43,7 +45,7 @@ class GinOracle:
     
     def get_avg_deadwood(self, phantom_cards, hand):
         if len(phantom_cards) == 0:
-            return hand.get_hand_score()
+            return self.hand_evaluator.get_hand_score(hand)
 
         else:
             pc_utility = 0
@@ -59,7 +61,7 @@ class GinOracle:
                     pc_utility += self.get_avg_deadwood(phantom_cards[1:], temp_hand)
                     continue
                     #print("Temp hand: ", temp_hand)
-                pc_utility += (phantom_cards[0].phantom_values[j] * temp_hand.get_hand_score())
+                pc_utility += (phantom_cards[0].phantom_values[j] * self.hand_evaluator.get_hand_score(temp_hand))
                      
         return pc_utility
     
