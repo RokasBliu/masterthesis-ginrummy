@@ -83,7 +83,7 @@ class HandEvaluator:
             while j <= len(hand.cards):
                 if self.lookup_table.flush_five.get(tuple_suits_suits[i:j], 0):
                     if self.lookup_table.straight_five.get(tuple_suits_values[i:j], 0):
-                        cards_to_add = self.cards[i:j]
+                        cards_to_add = hand.cards[i:j]
                         for c in cards_to_add:
                             c.meld_ids.append(self.meld_id_counter)
                         self.melds.append(hand.cards[i:j])

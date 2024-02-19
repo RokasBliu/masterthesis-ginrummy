@@ -10,6 +10,7 @@ from Button import Button
 import threading
 import pygame
 import sys
+import time
 
 class GinRummy(object):
     def __init__(self, player1, player2):
@@ -78,8 +79,10 @@ class GinRummy(object):
             print("Top of discard pile: ", self.discard_pile[-1])
             if player.name == "CFR":
                 print("CFR is thinking...")
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
-                print("CFR chose: ", answer)
+                end = time.time()
+                print("CFR chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
@@ -104,8 +107,10 @@ class GinRummy(object):
         while check_if_int == False:
             if player.name == "CFR":
                 print("CFR is thinking...")
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
-                print("CFR chose: ", answer)
+                end = time.time()
+                print("CFR chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
