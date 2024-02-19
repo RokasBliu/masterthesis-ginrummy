@@ -57,6 +57,7 @@ class GameState(object):
         if self.deck_size <= 2:
             self.state = "end_game"
         if self.main_player_index == self.turn_index:
+            self.top_card_discard_pile.just_drew = True
             self.main_player_hand.add(self.top_card_discard_pile)
             self.opponent_category_dist[6] += 1
             #self.action = Action("Draw from discard pile", self.top_card_discard_pile, self.main_player.name)
@@ -67,6 +68,13 @@ class GameState(object):
             self.opponent_known_cards.append(self.top_card_discard_pile)
             #self.action = Action("Draw from discard pile", self.top_card_discard_pile, "opponent")
             self.probability = self.probability/2
+
+            #Hard to figure out a good spot for this
+            for c in self.main_player_hand.cards:
+                if c.just_drew:
+                    c.just_drew = False
+                    break
+
             if self.top_card_discard_pile.isPhantom:
                 self.state = "end_game"
         
@@ -80,6 +88,7 @@ class GameState(object):
         if self.deck_size <= 2:
             self.state = "end_game"
         new_card = Card("", "")
+        new_card.just_drew = True
         new_card.make_phantom_card(self.rand_card_dist)
         
         if self.main_player_index == self.turn_index:
@@ -120,7 +129,7 @@ class GameState(object):
             self.round_number += 1
 
     def knock(self):
-        self.state = "end_game"
+        return self.main_player_expected_utility <= 10
     
     def print_state(self):
         print("--------------------")

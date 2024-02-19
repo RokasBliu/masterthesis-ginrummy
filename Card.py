@@ -2,6 +2,7 @@ class Card(object):
         def __init__(self, suit, value):
             self.suit = suit
             self.value = value
+            self.just_drew = False
             #self.image = pygame.image.load('images/' + self.suit + '_' + str(self.value) + '.svg')
             self.isHidden = False
             self.isPhantom = False

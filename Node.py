@@ -21,7 +21,6 @@ class Node:
             new_state = deepcopy(self.game_state)
             child = Node(new_state, self)                
             child.game_state.draw_from_discard_pile()
-
             self.children.append(child)
             #child.game_state.print_state()
             #print("Depth: ", child.depth)
@@ -43,19 +42,19 @@ class Node:
             child = Node(new_state, self)
             child.game_state.draw_card()
             self.children.append(child)
-            #child.game_state.print_state()
-            #print("Depth: ", child.depth)
         
         elif self.game_state.state == "discard":
             #Make states for each card in hand
             if self.game_state.main_player_index == self.game_state.turn_index:
                 for c in self.game_state.main_player_hand.cards:
-                    new_state = deepcopy(self.game_state)
-                    child = Node(new_state, self)
-                    child.game_state.discard_from_hand(c)
-                    self.children.append(child)
-                    #child.game_state.print_state()
-                    #print("Depth: ", child.depth)
+                    if not c.just_drew:
+                        new_state = deepcopy(self.game_state)
+                        child = Node(new_state, self)
+                        child.game_state.discard_from_hand(c)
+                        self.children.append(child)
+                        #child.game_state.print_state()
+                        #print("Depth: ", child.depth)
+
             else:
                 new_state = deepcopy(self.game_state)
                 child = Node(new_state, self)

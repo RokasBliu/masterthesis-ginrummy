@@ -36,7 +36,8 @@ class SuperSimpleCFR:
                 cards_names = []
                 cards = root.game_state.main_player_hand.cards
                 for i in range(len(cards)):
-                    cards_names.append(cards[i].__str__())
+                    if cards[i].just_drew is False:
+                        cards_names.append(cards[i].__str__())
                 self.strategies = pd.DataFrame(columns = cards_names, index = list(range(len(root.children)))).fillna(0)
 
         #for i in range(iterations):
@@ -55,15 +56,21 @@ class SuperSimpleCFR:
         print("Best strategy: ", best_strategy)
 
         if stage == "discard":
-            return self.strategies.columns.get_loc(best_strategy) + 1
+            for i in range(len(root.game_state.main_player_hand.cards)):
+                if root.game_state.main_player_hand.cards[i].__str__() == best_strategy:
+                    best_strategy = i + 1
+                    break
         
 
         return best_strategy
     
     def traverse(self, node, EndStage, EndDepth):
         #print("Traversing")
-        if node.depth == EndDepth or node.game_state.state == EndStage:
+        if node.depth == EndDepth or node.game_state.state == EndStage or node.game_state.state == "knock":
             #print("End reached")
+            if node.game_state.state == "knock":
+                print("Knock")
+                return 100
             utility = self.calculate_total_utility(node)
             return utility
         
@@ -133,8 +140,8 @@ class SuperSimpleCFR:
             exp_p2_utility_sum += exp_p2_utility_dist[i]
 
         tot_exp_utility = exp_p1_utility - exp_p2_utility_sum
-        if tot_exp_utility < 0:
-            tot_exp_utility = 0
+        #if tot_exp_utility < 0:
+            #tot_exp_utility = 0
         #print("Total expected utility: ", tot_exp_utility)
         return tot_exp_utility
 

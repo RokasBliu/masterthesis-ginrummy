@@ -94,11 +94,15 @@ class GinRummy(object):
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
         if answer.lower() == "random":
-            player.hand.add(self.deck.deal())
+            card_drawn = self.deck.deal()
+            card_drawn.just_drew = True
+            player.hand.add(card_drawn)
             self.drawing_from_discard = False
             print("You drew: ", player.hand.cards[-1])
         else:
-            player.hand.add(self.discard_pile.pop())
+            card_drawn = self.discard_pile.pop()
+            card_drawn.just_drew = True
+            player.hand.add(card_drawn)
             self.drawing_from_discard = True
 
     def discard(self, player, in_q):
@@ -128,6 +132,9 @@ class GinRummy(object):
         player.hand.cards.remove(card)
         self.discard_pile.append(card)
         self.drawing_from_discard = False
+
+        for c in player.hand.cards:
+            c.just_drew = False
 
         if self.hand_evaluator.get_hand_score(player.hand) <= 10:
             player.player_knock = True
