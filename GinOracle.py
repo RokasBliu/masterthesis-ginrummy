@@ -65,6 +65,28 @@ class GinOracle:
                      
         return pc_utility
     
+    def get_expected_util_sample(self, hand):
+        phantom_cards = []
+        determenistic_cards_hand = Hand()
+
+        for c in hand.cards:
+            if c.isPhantom:
+                phantom_cards.append(c)
+            else:
+                determenistic_cards_hand.add(c)
+
+        if len(phantom_cards) == 0:
+            return self.hand_evaluator.get_hand_score(determenistic_cards_hand)
+
+        if len(phantom_cards) >= 2:
+            determenistic_score = self.hand_evaluator.get_hand_score(determenistic_cards_hand)
+            utility_1_pc = self.get_avg_deadwood([phantom_cards[0]], determenistic_cards_hand)
+            pc_added_utility = utility_1_pc - determenistic_score
+            return determenistic_score + len(phantom_cards)*pc_added_utility
+        
+        else:
+            return self.get_avg_deadwood(phantom_cards, determenistic_cards_hand)
+
     #I do not think this is needed
     def update_random_card_dist(self, player_hand, known_cards, discard_pile):
 

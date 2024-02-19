@@ -26,7 +26,7 @@ class BotManager:
 
         if bot == "SuperSimpleCFR":
             sscfr = SuperSimpleCFR()
-            return sscfr.resolve(game_state, "end_game", 8, 1)
+            return sscfr.resolve(game_state, "end_game", 10, 1)
 
         elif bot == "GreedyBot":
             gb = GreedyBot()

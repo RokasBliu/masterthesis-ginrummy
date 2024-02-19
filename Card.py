@@ -15,6 +15,7 @@ class Card(object):
             self.isHidden = False
             self.isPhantom = True
             self.phantom_values = phantom_values
+            self.expected_utility = 0
 
         def __repr__(self):
             if self.isPhantom:
