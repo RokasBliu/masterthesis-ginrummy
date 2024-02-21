@@ -1,14 +1,13 @@
+from LookupTable import LookupTable
 class Hand(object):
     def __init__(self):
         self.cards = []
         self.melds = []
-        self.meld_id_counter = 0
         self.deadwood = 0
         self.rank_converter = {'Ace': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
                    'Jack': 11, 'Queen': 12, 'King': 13}
         self.card_values = {'Ace': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 
                'Jack': 10, 'Queen': 10, 'King': 10}
-        
         # Sort instantly when the hand is created
         self.sort_by_rank()
     
@@ -23,9 +22,6 @@ class Hand(object):
         list[i] = list[j]
         list[j] = temp
     
-    def flatten(self, list):
-        return [item for sublist in list for item in sublist]
-    
     def sort_by_rank(self):
         for i in range(len(self.cards)):
             for j in range(i, len(self.cards)):
@@ -34,9 +30,17 @@ class Hand(object):
         
         return self.cards
 
+    def sort_by_suit(self):
+        self.cards.sort(key=lambda card: card.suit)
+    
     def get_card_rank(self, card_value):
         return self.rank_converter[card_value]
     
+    
+    def check_lookup_table(self, lookup_table, i, j, tuple_values = None, tuple_suits_suits = None):
+        #TODO: Implement this, makes the code more readable
+        pass
+
     ##TODO: Optimaliser denne
     def get_hand_score(self):
         self.deadwood = 0
@@ -138,67 +142,6 @@ class Hand(object):
         
         return self.deadwood
                 
-    def find_best_meld(self):
-
-        meld_conflict = False
-        if len(self.melds) == 0:
-            return None
-        
-        if len(self.melds) == 1:
-            return self.melds[0]
-
-        for c in self.flatten(self.melds):
-            if len(c.meld_ids) > 1:
-                meld_conflict = True
-                #print("Meld conflict")
-                break
-
-        if meld_conflict == False:
-            return self.flatten(self.melds)        
-        else:
-
-            best_meld = self.melds[0]
-            best_meld_deadwood = 0
-            for c in self.cards:
-                if c not in best_meld:
-                    best_meld_deadwood += self.card_values[c.value]
-
-            #Check if melds can be combined
-            for i in range(len(self.melds)):
-                for j in range(i+1, len(self.melds)):
-                    can_combine = True
-                    ##Check for conflict
-                    for c in self.melds[i]:
-                        if c in self.melds[j]:
-                            can_combine = False
-                            break
-                    
-                    if can_combine == True:
-                        self.melds.append(self.melds[i] + self.melds[j])
-                    
-                            
-
-
-            for i in range(len(self.melds)):
-
-                meld_i_deadwood = 0
-
-                #print("------------------")
-                #print("Meld", self.melds[i])
-
-                for c in self.cards:
-                    if c not in self.melds[i]:
-                        meld_i_deadwood += self.card_values[c.value]
-
-                #print("Meld deadwood", meld_i_deadwood)
-                #print("Best meld deadwood", best_meld_deadwood)
-                #print("------------------")
-                if meld_i_deadwood < best_meld_deadwood:
-                    best_meld = self.melds[i]
-                    best_meld_deadwood = meld_i_deadwood
-
-
-        return best_meld
 
             
 

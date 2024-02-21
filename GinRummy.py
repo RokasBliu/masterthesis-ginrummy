@@ -1,5 +1,6 @@
 from BotManager import BotManager
 from Deck import Deck
+from HandEvaluator import HandEvaluator
 from Player import Player
 from Hand import Hand
 from queue import Queue
@@ -9,6 +10,7 @@ from Button import Button
 import threading
 import pygame
 import sys
+import time
 
 class GinRummy(object):
     def __init__(self, player1, player2):
@@ -39,6 +41,7 @@ class GinRummy(object):
 
         self.is_smaller_deck = False
         self.bot_manager = BotManager()
+        self.hand_evaluator = HandEvaluator()
 
     def start_new_game(self, with_smaller_deck=True):
         self.game_number += 1
@@ -53,28 +56,6 @@ class GinRummy(object):
             self.players[0].player_draw = True
             self.players[1].player_draw = False
             self.start_new_round()
-
-    def start_new_round(self):
-        self.round_number += 1
-        for p in self.players:
-            p.hand = Hand()
-            p.player_draw = False
-            p.player_discard = False
-            p.player_knock = False
-
-            #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot":
-                p.is_human = False
-
-        self.deck = Deck()
-        if self.is_smaller_deck:
-                self.deck.make_smaller_deck()
-        self.deck.shuffle()
-        self.deal(self.is_smaller_deck)
-        self.bot_manager.known_cards = []
-        self.discard_pile = []
-        self.discard_pile.append(self.deck.deal())
-        
 
     def deal(self, with_smaller_deck=True):
         num_cards = self.NORMAL_NUM_CARDS_PER_HAND
@@ -92,24 +73,36 @@ class GinRummy(object):
             print("Deck size: ", len(self.deck))
             if player.name == "CFR":
                 print("CFR is thinking...")
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
-                print("CFR chose: ", answer)
+                end = time.time()
+                print("CFR chose: {} in {} seconds".format(answer, (end-start)))
+            elif player.name == "CFRBaseline":
+                print("CFR is thinking...")
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("draw", "SSCFRBaseline", self)
+                end = time.time()
+                print("CFR Baseline chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
                 print("GreedyBot chose: ", answer)
             else:
                 answer = in_q.get()
-                
+
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
         if answer.lower() == "random":
-            player.hand.add(self.deck.deal())
+            card_drawn = self.deck.deal()
+            card_drawn.just_drew = True
+            player.hand.add(card_drawn)
             self.drawing_from_discard = False
             print("You drew: ", player.hand.cards[-1])
         else:
-            self.bot_manager.add_known_card(self.discard_pile[-1], player)
-            player.hand.add(self.discard_pile.pop())
+            card_drawn = self.discard_pile.pop()
+            card_drawn.just_drew = True
+            player.hand.add(card_drawn)
             self.drawing_from_discard = True
+            self.bot_manager.add_known_card(card_drawn, self.turn_index)
 
     def discard(self, player, in_q):
         print("Your hand: ", player.hand.sort_by_rank())
@@ -117,8 +110,16 @@ class GinRummy(object):
         while check_if_int == False:
             if player.name == "CFR":
                 print("CFR is thinking...")
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
-                print("CFR chose: ", answer)
+                end = time.time()
+                print("CFR chose: {} in {} seconds".format(answer, (end-start)))
+            elif player.name == "CFRBaseline":
+                print("CFR is thinking...")
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("discard", "SSCFRBaseline", self)
+                end = time.time()
+                print("CFR Baseline chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
                 print("GreedyBot chose: ", answer)
@@ -135,8 +136,12 @@ class GinRummy(object):
         player.hand.cards.remove(card)
         self.discard_pile.append(card)
         self.drawing_from_discard = False
+        self.bot_manager.remove_known_card(card, self.turn_index)
 
-        if player.hand.get_hand_score() <= 10:
+        for c in player.hand.cards:
+            c.just_drew = False
+
+        if self.hand_evaluator.get_hand_score(player.hand) <= 10:
             player.player_knock = True
             answering = False
             while answering == False:
@@ -222,6 +227,27 @@ class GinRummy(object):
             self.short_of_card = False
             self.start_new_round()
 
+    def start_new_round(self):
+        self.round_number += 1
+        for p in self.players:
+            p.hand = Hand()
+            p.player_draw = False
+            p.player_discard = False
+            p.player_knock = False
+
+            #A bit spaghetti, but it works
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
+                p.is_human = False
+
+        self.deck = Deck()
+        if self.is_smaller_deck:
+                self.deck.make_smaller_deck()
+        self.deck.shuffle()
+        self.deal(self.is_smaller_deck)
+        self.discard_pile = []
+        self.discard_pile.append(self.deck.deal())
+        self.bot_manager = BotManager()
+
     def game_flow(self, in_q):
         self.start_new_game(True)
         print("------------------")
@@ -251,8 +277,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
 
         # Main menu loop
         start_game = False

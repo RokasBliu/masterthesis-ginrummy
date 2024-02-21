@@ -1,28 +1,30 @@
 import random
+from Card import Card
 #from Gin_Rummy import Gin_Rummy
 from Hand import Hand
 from Deck import Deck
 from copy import deepcopy
+from HandEvaluator import HandEvaluator
 
 from Player import Player
 class GinOracle:
     def __init__(self):
         #Making for smaller deck for now
-        self.deck = Deck().make_smaller_deck()
         self.close_valued_cards = {
-            '5': ['6', '7', '8'],
-            '6': ['5', '7', '8', '9'],
-            '7': ['5', '6', '8', '9', '10'],
-            '8': ['5', '6', '7', '9', 'Jack', 'Queen'],
-            '9': ['6', '7', '8', '10', 'Jack', 'Queen', 'King'],
-            '10': ['7', '8', '9', 'Jack', 'Queen', 'King'],
-            'Jack': ['8', '9', '10', 'Queen', 'King'],
-            'Queen': ['9', '10', 'Jack', 'King'],
-            'King': ['10', 'Jack', 'Queen']
+            '5': ['6', '7'],
+            '6': ['5', '7', '8'],
+            '7': ['5', '6', '8', '9'],
+            '8': ['6', '7', '9', '10'],
+            '9': ['7', '8', '10', 'Jack'],
+            '10': ['8', '9', 'Jack', 'Queen'],
+            'Jack': ['9', '10', 'Queen', 'King'],
+            'Queen': ['10', 'Jack', 'King'],
+            'King': ['Jack', 'Queen']
         }
         self.low_valued_cards = ['5', '6', '7']
         self.deck = Deck()
         self.deck.make_smaller_deck()
+        self.hand_evaluator = HandEvaluator()
         pass
 
     #TODO - Implement get expected value from hand with phantom cards
@@ -38,35 +40,52 @@ class GinOracle:
                 determenistic_cards_hand.add(c)
         
         expected_deadwood = self.get_avg_deadwood(phantom_cards, determenistic_cards_hand)
-        #pc_utility = expected_deadwood - hand.deadwood
-        #print("Determenistic deadwood: ", hand.deadwood)
-        #print("Phantom card utility: ", pc_utility)
-        #print("Expected utility: ", expected_deadwood)
         return expected_deadwood
     
     
     def get_avg_deadwood(self, phantom_cards, hand):
         if len(phantom_cards) == 0:
-            return hand.get_hand_score()
+            return self.hand_evaluator.get_hand_score(hand)
 
         else:
             pc_utility = 0
-            for j in range(len(self.deck)):
-
-                if phantom_cards[0].phantom_values[j] == 0:
+            for i in range(len(self.deck)):
+                if phantom_cards[0].phantom_values[i] == 0:
                     continue
 
-                temp_hand = deepcopy(hand)
-                temp_hand.cards.append(self.deck[j])
-
-                if len(phantom_cards) > 1:
-                    pc_utility += self.get_avg_deadwood(phantom_cards[1:], temp_hand)
-                    continue
-                    #print("Temp hand: ", temp_hand)
-                pc_utility += (phantom_cards[0].phantom_values[j] * temp_hand.get_hand_score())
-                     
-        return pc_utility
+                new_hand = deepcopy(hand)
+                card_to_add = self.deck[i]
+                new_hand.add(card_to_add)
+                if len(phantom_cards) == 1:
+                    pc_utility += self.hand_evaluator.get_hand_score(new_hand) * phantom_cards[0].phantom_values[i]
+                else:
+                    pc_utility += self.get_avg_deadwood(phantom_cards[1:], new_hand) * phantom_cards[0].phantom_values[i]
+                
+            return pc_utility
+            
     
+    def get_expected_util_sample(self, hand):
+        phantom_cards = []
+        determenistic_cards_hand = Hand()
+
+        for c in hand.cards:
+            if c.isPhantom:
+                phantom_cards.append(c)
+            else:
+                determenistic_cards_hand.add(c)
+
+        if len(phantom_cards) == 0:
+            return self.hand_evaluator.get_hand_score(determenistic_cards_hand)
+
+        if len(phantom_cards) >= 1:
+            determenistic_score = self.hand_evaluator.get_hand_score(determenistic_cards_hand)
+            utility_1_pc = self.get_avg_deadwood([phantom_cards[0]], determenistic_cards_hand)
+            pc_added_utility = utility_1_pc - determenistic_score
+            return determenistic_score + len(phantom_cards)*pc_added_utility
+        
+        else:
+            return self.get_avg_deadwood(phantom_cards, determenistic_cards_hand)
+
     #I do not think this is needed
     def update_random_card_dist(self, player_hand, known_cards, discard_pile):
 
@@ -99,30 +118,33 @@ class GinOracle:
                 return category_dist
             if len(opponent_known_cards) > 0:
                 #Check if know cards can make a meld with the card drawn
-                if len(opponent_known_cards) > 2:
-                    hasMeld = self.check_for_meld_equal_cards(opponent_known_cards)
-                    if hasMeld:
+                #TODO test if this is a good idea, may be uneccesary
+                """if len(opponent_known_cards) > 2:
+                    hasMeld_equal_cards = self.check_for_meld_equal_cards(opponent_known_cards)
+                    if hasMeld_equal_cards:
                         category_dist[0] = 10
-                        category_dist[2] += 2
-                        category_dist[4] += 1
+                        category_dist[2] += 5
+                        category_dist[4] += 2"""
 
                     #hasSequence = self.check_for_sequence(opponent_known_cards)
 
                 for c in opponent_known_cards:
                     #print("Card drawn: ", card_drawn.value, " Card in hand: ", c.value)
                     if c.value == card_drawn.value:
-                        category_dist[0] += 1
-                        category_dist[2] += 0.2
-                        category_dist[4] += 0.1     
-                    if c.value in self.close_valued_cards[card_drawn.value]:
-                        category_dist[1] += 1
-                        category_dist[2] += 0.2
-                        category_dist[4] += 0.1
+                        category_dist[0] += 5
+                        category_dist[2] += 2
+                        category_dist[4] += 1
+                    
+                    if c.suit == card_drawn.suit:
+                        if c.value in self.close_valued_cards[card_drawn.value]:
+                            category_dist[1] += 5
+                            category_dist[2] += 2
+                            category_dist[4] += 1
 
             if card_drawn.value in self.low_valued_cards:
-                category_dist[2] += 0.2
-                category_dist[3] += 0.2
-                category_dist[4] += 0.1
+                category_dist[2] += 1
+                category_dist[3] += 2
+                category_dist[4] += 1
             
             category_dist[5] += 1
         
@@ -143,7 +165,6 @@ class GinOracle:
         
         return False
 
-        return category_dist
     
     def check_for_sequence(self, hand):
         #TODO - implement
