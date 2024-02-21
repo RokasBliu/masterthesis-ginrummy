@@ -1,4 +1,5 @@
 from GameState import GameState
+from SSCFRBaseline import SSCFRBaseline
 from SuperSimpleCFR import SuperSimpleCFR
 from GreedyBot import GreedyBot
 class BotManager:
@@ -27,7 +28,9 @@ class BotManager:
         if bot == "SuperSimpleCFR":
             sscfr = SuperSimpleCFR()
             return sscfr.resolve(game_state, "end_game", 8, 1)
-
+        elif bot == "SSCFRBaseline":
+            sscfr = SSCFRBaseline()
+            return sscfr.resolve(game_state, "end_game", 8, 1)
         elif bot == "GreedyBot":
             gb = GreedyBot()
             return gb.get_action(game_state)

@@ -83,6 +83,10 @@ class GinRummy(object):
                 answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
                 end = time.time()
                 print("CFR chose: {} in {} seconds".format(answer, (end-start)))
+            elif player.name == "CFRBaseline":
+                print("CFR is thinking...")
+                answer = self.bot_manager.get_action_from_bot("draw", "SSCFRBaseline", self)
+                print("Bot 2 chose: ", answer)
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
@@ -115,6 +119,10 @@ class GinRummy(object):
                 answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
                 end = time.time()
                 print("CFR chose: {} in {} seconds".format(answer, (end-start)))
+            elif player.name == "CFRBaseline":
+                print("CFR is thinking...")
+                answer = self.bot_manager.get_action_from_bot("discard", "SSCFRBaseline", self)
+                print("Bot 2 chose: ", answer)
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
@@ -200,7 +208,7 @@ class GinRummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
                 p.is_human = False
 
         self.deck = Deck()
@@ -241,8 +249,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
 
 
         # Main menu loop

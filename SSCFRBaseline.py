@@ -1,10 +1,8 @@
-#from Game_State import Game_State
-#from Gin_Oracle import Gin_Oracle
 import random
 from Node import Node
 import pandas as pd
 
-class SuperSimpleCFR:
+class SSCFRBaseline:
     def __init__(self):
         self.strategies = None
         self.regret_sum = {}
@@ -101,9 +99,6 @@ class SuperSimpleCFR:
                 self.insert_strategy_via_index(utility, i)
 
             return 0
-
-                
-
     
     def update_strategies(self):
         return
@@ -132,7 +127,8 @@ class SuperSimpleCFR:
 
     def calculate_total_utility(self, node):
         #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
-        main_player_exp_deadwood = node.game_state.oracle.get_expected_util_sample(node.game_state.main_player_hand)
+        main_player_exp_deadwood = node.game_state.oracle.get_expected_utility(node.game_state.main_player_hand)
+        print("Main player deadwood: ", main_player_exp_deadwood)
         exp_p1_utility = self.best_possible_utility - main_player_exp_deadwood
         exp_p2_utility_dist = node.game_state.opponent_category_dist
         exp_p2_utility_sum = 0
