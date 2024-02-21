@@ -85,15 +85,15 @@ class GinRummy(object):
                 print("CFR chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "CFRBaseline":
                 print("CFR is thinking...")
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SSCFRBaseline", self)
-                print("Bot 2 chose: ", answer)
+                end = time.time()
+                print("CFR Baseline chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
             else:
                 answer = in_q.get()
-                if answer == "discard":
-                    self.bot_manager.add_known_card(self.discard_pile[-1], player)
 
             answering = answer.lower() == "random" or answer.lower() == "discard"
         
@@ -108,6 +108,7 @@ class GinRummy(object):
             card_drawn.just_drew = True
             player.hand.add(card_drawn)
             self.drawing_from_discard = True
+            self.bot_manager.add_known_card(card_drawn, self.turn_index)
 
     def discard(self, player, in_q):
         print("Your hand: ", player.hand.sort_by_rank())
@@ -121,14 +122,15 @@ class GinRummy(object):
                 print("CFR chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "CFRBaseline":
                 print("CFR is thinking...")
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SSCFRBaseline", self)
-                print("Bot 2 chose: ", answer)
+                end = time.time()
+                print("CFR Baseline chose: {} in {} seconds".format(answer, (end-start)))
             elif player.name == "GreedyBot":
                 answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
                 print("Bot 2 chose: ", answer)
             else:    
                 answer = in_q.get()
-                self.bot_manager.remove_known_card(player.hand.cards[int(answer)-1])
 
             check_if_int = True
             try:
@@ -140,6 +142,7 @@ class GinRummy(object):
         player.hand.cards.remove(card)
         self.discard_pile.append(card)
         self.drawing_from_discard = False
+        self.bot_manager.remove_known_card(card, self.turn_index)
 
         for c in player.hand.cards:
             c.just_drew = False
@@ -215,10 +218,9 @@ class GinRummy(object):
         self.deck.make_smaller_deck()
         self.deck.shuffle()
         self.deal()
-        self.bot_manager.known_cards = []
         self.discard_pile = []
         self.discard_pile.append(self.deck.deal())
-        self.bot_manager.known_cards = []
+        self.bot_manager = BotManager()
 
     def game_flow(self, in_q):
         self.start_new_game(True)

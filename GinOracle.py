@@ -1,4 +1,5 @@
 import random
+from Card import Card
 #from Gin_Rummy import Gin_Rummy
 from Hand import Hand
 from Deck import Deck
@@ -9,7 +10,6 @@ from Player import Player
 class GinOracle:
     def __init__(self):
         #Making for smaller deck for now
-        self.deck = Deck().make_smaller_deck()
         self.close_valued_cards = {
             '5': ['6', '7'],
             '6': ['5', '7', '8'],
@@ -49,21 +49,20 @@ class GinOracle:
 
         else:
             pc_utility = 0
-            for j in range(len(self.deck)):
-
-                if phantom_cards[0].phantom_values[j] == 0:
+            for i in range(len(self.deck)):
+                if phantom_cards[0].phantom_values[i] == 0:
                     continue
 
-                temp_hand = deepcopy(hand)
-                temp_hand.cards.append(self.deck[j])
-
-                if len(phantom_cards) > 1:
-                    pc_utility += self.get_avg_deadwood(phantom_cards[1:], temp_hand)
-                    continue
-                    #print("Temp hand: ", temp_hand)
-                pc_utility += (phantom_cards[0].phantom_values[j] * self.hand_evaluator.get_hand_score(temp_hand))
-                     
-        return pc_utility
+                new_hand = deepcopy(hand)
+                card_to_add = self.deck[i]
+                new_hand.add(card_to_add)
+                if len(phantom_cards) == 1:
+                    pc_utility += self.hand_evaluator.get_hand_score(new_hand) * phantom_cards[0].phantom_values[i]
+                else:
+                    pc_utility += self.get_avg_deadwood(phantom_cards[1:], new_hand) * phantom_cards[0].phantom_values[i]
+                
+            return pc_utility
+            
     
     def get_expected_util_sample(self, hand):
         phantom_cards = []
@@ -78,7 +77,7 @@ class GinOracle:
         if len(phantom_cards) == 0:
             return self.hand_evaluator.get_hand_score(determenistic_cards_hand)
 
-        if len(phantom_cards) >= 2:
+        if len(phantom_cards) >= 1:
             determenistic_score = self.hand_evaluator.get_hand_score(determenistic_cards_hand)
             utility_1_pc = self.get_avg_deadwood([phantom_cards[0]], determenistic_cards_hand)
             pc_added_utility = utility_1_pc - determenistic_score

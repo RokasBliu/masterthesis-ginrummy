@@ -128,7 +128,6 @@ class SSCFRBaseline:
     def calculate_total_utility(self, node):
         #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
         main_player_exp_deadwood = node.game_state.oracle.get_expected_utility(node.game_state.main_player_hand)
-        print("Main player deadwood: ", main_player_exp_deadwood)
         exp_p1_utility = self.best_possible_utility - main_player_exp_deadwood
         exp_p2_utility_dist = node.game_state.opponent_category_dist
         exp_p2_utility_sum = 0
