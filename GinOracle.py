@@ -170,6 +170,20 @@ class GinOracle:
         #TODO - implement
         return False
     
+    def get_hit_cards(self, hand, known_cards, discard_pile):
+        #Checks for if one card can me drawn to go gin
+        hit_cards = []
+        for c in self.deck:
+            if c in hand or c in known_cards or c in discard_pile:
+                continue
+
+            temp_hand = deepcopy(hand)
+            temp_hand.add(c)
+            if self.hand_evaluator.get_hand_score(temp_hand) == 0:
+                hit_cards.append(c)
+            
+        return hit_cards
+
     """def create_random_game(self):
         player1 = Player("Player 1")
         player2 = Player("Player 2")

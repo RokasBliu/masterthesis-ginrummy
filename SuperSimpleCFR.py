@@ -144,3 +144,34 @@ class SuperSimpleCFR:
             #tot_exp_utility = 0
         #print("Total expected utility: ", tot_exp_utility)
         return tot_exp_utility
+    
+    def knocking_strategy_rule_based(self, state):
+            hand_evaluator = state.oracle.hand_evaluator
+            if state.round_number > 8:
+                return "n"
+            
+            hit_cards = state.oracle.get_hit_cards(state.main_player_hand)
+            if len(hit_cards) > 2:
+                deadwood, melds = hand_evaluator.get_hand_score(state.main_player_hand, True)
+                unmelded_cards_count = 0
+                for c in state.main_player_hand.cards:
+                    if c in melds:
+                        continue
+                    unmelded_cards_count += 1
+                
+                if unmelded_cards_count <= 1:
+                    return "n"
+                
+                if unmelded_cards_count > 3 and deadwood < 6:
+                    return "n"
+            
+            return "y"
+
+
+                
+
+            
+
+            
+            
+            
