@@ -53,11 +53,11 @@ class BotManager:
             print("Bot not found")
             return
         
-    def get_knocking_action(game, bot):
+    def get_knocking_action(self, game, bot):
         if bot == "SuperSimpleCFR":
             game_state = GameState(game, "draw", [])
             sscfr = SuperSimpleCFR()
-            return sscfr.get_knocking_action(game_state)
+            return sscfr.knocking_strategy_rule_based(game_state)
         
         else:
             return "y"

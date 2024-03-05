@@ -174,7 +174,7 @@ class GinOracle:
         #Checks for if one card can me drawn to go gin
         hit_cards = []
         for c in self.deck:
-            if c in hand or c in known_cards or c in discard_pile:
+            if c in hand.cards or c in known_cards or c in discard_pile:
                 continue
 
             temp_hand = deepcopy(hand)

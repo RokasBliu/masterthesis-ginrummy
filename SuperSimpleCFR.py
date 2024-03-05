@@ -150,7 +150,7 @@ class SuperSimpleCFR:
             if state.round_number > 8:
                 return "n"
             
-            hit_cards = state.oracle.get_hit_cards(state.main_player_hand)
+            hit_cards = state.oracle.get_hit_cards(state.main_player_hand, state.opponent_known_cards, state.discard_pile)
             if len(hit_cards) > 2:
                 deadwood, melds = hand_evaluator.get_hand_score(state.main_player_hand, True)
                 unmelded_cards_count = 0

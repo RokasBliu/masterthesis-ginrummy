@@ -147,7 +147,8 @@ class GinRummy(object):
             while answering == False:
                 if player.name == "CFR":
                     # For now we make that bots knock instantly
-                    knock_answer = "y"
+                    #Testing for a knocking algorithm
+                    knock_answer = self.bot_manager.get_knocking_action(self, "SuperSimpleCFR")
                 elif player.name == "GreedyBot":
                     knock_answer = "y"
                 else:  
