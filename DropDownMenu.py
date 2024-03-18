@@ -14,7 +14,7 @@ class DropDownMenu(object):
     def draw(self, window, xpos, ypos, font_color=(0,0,0), main_color=(255,255,255), dropdown_color=(235,235,235)):
         self.dropdown_rects = []
         self.main_rect = pygame.draw.rect(window, main_color, pygame.Rect(xpos, ypos, self.width, self.height))
-        my_font = pygame.font.SysFont('Comic Sans MS', self.height - 4)
+        my_font = pygame.font.SysFont('Comic Sans MS', self.height - 20)
         dropdown_text = my_font.render(self.selected_item, False, font_color)
         window.blit(dropdown_text, (xpos + (self.width / 2 - dropdown_text.get_width() / 2), ypos + (self.height / 2 - dropdown_text.get_height() / 2)))
         if self.is_open == True:
