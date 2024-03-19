@@ -147,12 +147,15 @@ class SuperSimpleCFR:
     
     def knocking_strategy_rule_based(self, state):
             hand_evaluator = state.oracle.hand_evaluator
-            if state.round_number > 8:
+            deadwood, melds = hand_evaluator.get_hand_score(state.main_player_hand, True)
+            if deadwood == 0:
+                return "y"
+            
+            if state.turn_number > 8:
                 return "n"
             
             hit_cards = state.oracle.get_hit_cards(state.main_player_hand, state.opponent_known_cards, state.discard_pile)
             if len(hit_cards) > 2:
-                deadwood, melds = hand_evaluator.get_hand_score(state.main_player_hand, True)
                 unmelded_cards_count = 0
                 for c in state.main_player_hand.cards:
                     if c in melds:

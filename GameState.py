@@ -13,6 +13,7 @@ class GameState(object):
         self.turn_index = game.turn_index
         #self.current_player = game_state.players[self.turn_index]
         self.round_number = game.round_number
+        self.turn_number = game.turn_number
 
         self.state = state
         self.probability = 1
@@ -51,7 +52,6 @@ class GameState(object):
         #print("Random card distribution: ", self.rand_card_dist)
         
         
-
     def draw_from_discard_pile(self):
         self.deck_size -= 1
         if self.deck_size <= 2:
@@ -69,12 +69,6 @@ class GameState(object):
             #self.action = Action("Draw from discard pile", self.top_card_discard_pile, "opponent")
             self.probability = self.probability/2
 
-            #Hard to figure out a good spot for this
-            for c in self.main_player_hand.cards:
-                if c.just_drew:
-                    c.just_drew = False
-                    break
-
             if self.top_card_discard_pile.isPhantom:
                 self.state = "end_game"
         
@@ -88,19 +82,14 @@ class GameState(object):
         if self.deck_size <= 2:
             self.state = "end_game"
         new_card = Card("", "")
-        new_card.just_drew = True
         new_card.make_phantom_card(self.rand_card_dist)
         
         if self.main_player_index == self.turn_index:
             #Adding a random card to hand
-            
             self.main_player_hand.add(new_card)
-            #self.action = Action("Draw from deck", new_card, self.main_player.name)
         
         #TODO Adjust "probability score" of opponent, because it did not draw from the discard pile
         else:
-            #print("Opponent drew from deck")
-            #self.action = Action("Draw from deck", new_card, "opponent")
             self.probability = self.probability/2
 
         
@@ -122,6 +111,13 @@ class GameState(object):
 
         self.discard_pile.append(card)
         self.top_card_discard_pile = card
+
+        #Hard to figure out a good spot for this
+        for c in self.main_player_hand.cards:
+            if c.just_drew:
+                c.just_drew = False
+                break
+
         
         self.state = "draw"
         self.turn_index = (self.turn_index + 1) % 2

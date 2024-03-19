@@ -28,6 +28,7 @@ class GinRummy(object):
 
         self.game_number = 0
         self.round_number = 0
+        self.turn_number = 0
 
         self.deck = []
         self.discard_pile = []
@@ -93,7 +94,6 @@ class GinRummy(object):
         
         if answer.lower() == "random":
             card_drawn = self.deck.deal()
-            card_drawn.just_drew = True
             player.hand.add(card_drawn)
             self.drawing_from_discard = False
             print("You drew: ", player.hand.cards[-1])
@@ -163,6 +163,9 @@ class GinRummy(object):
                 player.player_draw = True
 
         self.turn_index = (self.turn_index + 1) % 2
+        if self.turn_index == 0:
+            self.turn_number += 1
+            print("Turn number: ", self.turn_number)
 
     def knock(self, player, in_q):
         self.decline_round = False
@@ -230,6 +233,7 @@ class GinRummy(object):
 
     def start_new_round(self):
         self.round_number += 1
+        self.turn_number = 0
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
