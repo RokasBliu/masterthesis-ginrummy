@@ -7,6 +7,7 @@ from queue import Queue
 from BarChart import BarChart
 from DropDownMenu import DropDownMenu
 from Button import Button
+from Stats import Stats
 import threading
 import pygame
 import sys
@@ -28,6 +29,7 @@ class GinRummy(object):
 
         self.game_number = 0
         self.round_number = 0
+        self.total_round_number = 0
         self.turn_number = 0
 
         self.deck = []
@@ -52,11 +54,34 @@ class GinRummy(object):
             self.round_number = 0
             for p in self.players:
                 p.score = 0
+                p.round_wins = 0
                 p.wants_rematch = False
             self.game_over = False
             self.players[0].player_draw = True
             self.players[1].player_draw = False
             self.start_new_round()
+    
+    def start_new_round(self):
+        self.round_number += 1
+        self.total_round_number += 1
+        for p in self.players:
+            p.hand = Hand()
+            p.player_draw = False
+            p.player_discard = False
+            p.player_knock = False
+
+            #A bit spaghetti, but it works
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
+                p.is_human = False
+
+        self.deck = Deck()
+        if self.is_smaller_deck:
+            self.deck.make_smaller_deck()
+        self.deck.shuffle()
+        self.deal(self.is_smaller_deck)
+        self.discard_pile = []
+        self.discard_pile.append(self.deck.deal())
+        self.bot_manager = BotManager()
 
     def deal(self, with_smaller_deck=True):
         num_cards = self.NORMAL_NUM_CARDS_PER_HAND
@@ -68,35 +93,48 @@ class GinRummy(object):
 
     def draw(self, player, in_q):
         answering = False
+        player.total_turns += 1
+        print("Your hand: ", player.hand.sort_by_rank())
+        print("Top of discard pile: ", self.discard_pile[-1])
+        print("Deck size: ", len(self.deck))
+        time_diff = 0
         while answering == False:
-            print("Your hand: ", player.hand.sort_by_rank())
-            print("Top of discard pile: ", self.discard_pile[-1])
-            print("Deck size: ", len(self.deck))
             if player.name == "CFR":
-                print("CFR is thinking...")
+                print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
                 end = time.time()
-                print("CFR chose: {} in {} seconds".format(answer, (end-start)))
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "CFRBaseline":
-                print("CFR is thinking...")
+                print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SSCFRBaseline", self)
                 end = time.time()
-                print("CFR Baseline chose: {} in {} seconds".format(answer, (end-start)))
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "GreedyBot":
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
-                print("GreedyBot chose: ", answer)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             else:
+                start = time.time()
                 answer = in_q.get()
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
 
             answering = answer.lower() == "random" or answer.lower() == "discard"
+
+        player.avg_draw_time = (player.avg_draw_time + time_diff) / player.total_turns
         
         if answer.lower() == "random":
             card_drawn = self.deck.deal()
             player.hand.add(card_drawn)
             self.drawing_from_discard = False
-            print("You drew: ", player.hand.cards[-1])
+            print(f"{player.name} drew: {player.hand.cards[-1]}")
         else:
             card_drawn = self.discard_pile.pop()
             card_drawn.just_drew = True
@@ -105,24 +143,30 @@ class GinRummy(object):
             self.bot_manager.add_known_card(card_drawn, self.turn_index)
 
     def discard(self, player, in_q):
-        print("Your hand: ", player.hand.sort_by_rank())
+        print(f"{player.name} hand: {player.hand.sort_by_rank()}")
         check_if_int = False
+        time_diff = 0
         while check_if_int == False:
             if player.name == "CFR":
-                print("CFR is thinking...")
+                print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
                 end = time.time()
-                print("CFR chose: {} in {} seconds".format(answer, (end-start)))
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "CFRBaseline":
-                print("CFR is thinking...")
+                print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SSCFRBaseline", self)
                 end = time.time()
-                print("CFR Baseline chose: {} in {} seconds".format(answer, (end-start)))
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "GreedyBot":
+                start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
-                print("GreedyBot chose: ", answer)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             else:    
                 answer = in_q.get()
 
@@ -131,6 +175,8 @@ class GinRummy(object):
                 int(answer)
             except ValueError:
                 check_if_int = False
+
+        player.avg_discard_time = (player.avg_discard_time + time_diff) / player.total_turns
         
         card = player.hand.cards[int(answer)-1]
         player.hand.cards.remove(card)
@@ -168,6 +214,11 @@ class GinRummy(object):
             print("Turn number: ", self.turn_number)
 
     def knock(self, player, in_q):
+        player.total_knocks += 1
+
+        for p in self.players:
+            p.score_per_round.append(p.score)
+
         self.decline_round = False
         self.game_over = True
         self.strike_one = False
@@ -179,13 +230,26 @@ class GinRummy(object):
         print("Other player's hand score: ", other_player.hand.deadwood)
         print("------------------")
 
-        if player.hand.deadwood == 0:
-            player.score += (other_player.hand.deadwood - player.hand.deadwood) + self.GIN_POINTS
+        deadwood = self.hand_evaluator.get_hand_score(player.hand)
+        other_deadwood = self.hand_evaluator.get_hand_score(other_player.hand)
+        if deadwood == 0:
+            score = (other_deadwood - deadwood) + self.GIN_POINTS
+            player.score += score
+            player.total_score += score
+            player.total_gins += 1
+            player.round_wins += 1
         else:
-            if player.hand.deadwood < other_player.hand.deadwood:
-                player.score += other_player.hand.deadwood - player.hand.deadwood
+            if deadwood < other_deadwood:
+                score = other_player.hand.deadwood - player.hand.deadwood
+                player.score += score
+                player.total_score += score
+                player.round_wins += 1
             else: # player.hand.deadwood > other_player.hand.deadwood
-                other_player.score += player.hand.deadwood - other_player.hand.deadwood + self.UNDERCUT_POINTS
+                score = deadwood - other_deadwood + self.UNDERCUT_POINTS
+                other_player.score += score
+                other_player.total_score += score
+                other_player.total_undercuts += 1
+                other_player.round_wins += 1
 
         print(f"{self.players[0].name}'s score: ", self.players[0].score)
         print(f"{self.players[1].name}'s score: ", self.players[1].score)
@@ -196,6 +260,14 @@ class GinRummy(object):
             self.game_over = True
             print(f"{bigger_score_player.name} won the game!")
             bigger_score_player.wins += 1
+
+            for p in self.players:
+                p.wins_per_game.append(p.wins)
+                p.score_per_game.append(p.score)
+                p.round_wins_per_game.append(p.round_wins)
+
+            Stats.plot(self.game_number, [self.players[0], self.players[1]])
+            Stats.finalize_plot()
 
             # Give option to restart, go to main menu, see stats or close the game
             what_to_do = ["", ""]
@@ -327,14 +399,8 @@ def pygame_display(game, out_q, window, clock, FPS):
         window_width, window_height = window.get_size()
         screen_width, screen_height = pygame.display.get_desktop_sizes()[0]
         custom_border_width, custom_border_height = (window_width * 0.5, window_height * 0.7)
-        custom_window_placement = (10, window_height/2 - custom_border_height/2)
+        custom_window_placement = (window_width/2 - custom_border_width/2, window_height/2 - custom_border_height/2)
         padding = 2
-
-        # Draw window border
-        # pygame.draw.line(window, (40, 72, 68), custom_window_placement, (custom_window_placement[0], custom_window_placement[1] + custom_border_height), width=1)
-        # pygame.draw.line(window, (40, 72, 68), custom_window_placement, (custom_window_placement[0] + custom_border_width, custom_window_placement[1]), width=1)
-        # pygame.draw.line(window, (40, 72, 68), (custom_window_placement[0], custom_window_placement[1] + custom_border_height), (custom_window_placement[0] + custom_border_width, custom_window_placement[1] + custom_border_height), width=1)
-        # pygame.draw.line(window, (40, 72, 68), (custom_window_placement[0] + custom_border_width, custom_window_placement[1]), (custom_window_placement[0] + custom_border_width, custom_window_placement[1] + custom_border_height), width=1)
 
         mouse_click_x, mouse_click_y = mouse_click_pos
         if game.game_over == False:
@@ -385,6 +451,13 @@ def pygame_display(game, out_q, window, clock, FPS):
             player_2_text = my_font.render(game.players[1].name, False, (0, 0, 0))
             window.blit(player_2_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
 
+            my_font = pygame.font.SysFont('Comic Sans MS', 10 // (screen_height // window_height))
+            player_1_text = my_font.render(f"{game.players[0].total_score}", False, (0, 0, 0))
+            window.blit(player_1_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8))
+            player_2_text = my_font.render(f"{game.players[1].total_score}", False, (0, 0, 0))
+            window.blit(player_2_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
+
+
             # Display player turn
             my_font = pygame.font.SysFont('Comic Sans MS', 20 // (screen_height // window_height))
             player_turn = game.turn_index
@@ -409,17 +482,6 @@ def pygame_display(game, out_q, window, clock, FPS):
             player_2_score = my_font.render(f"Score: {game.players[1].score}", False, (0, 0, 0))
             window.blit(player_2_score, (custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
             
-            # Display game info
-            game_num = game.game_number
-            game_num_text = my_font.render(f"Game: {game_num}", False, (0, 0, 0))
-            window.blit(game_num_text, (custom_window_placement[0], (custom_border_height - game_num_text.get_height()*2) / 2 + custom_window_placement[1]))
-            round_num = game.round_number
-            round_num_text = my_font.render(f"Round: {round_num}", False, (0, 0, 0))
-            window.blit(round_num_text, (custom_window_placement[0], (custom_border_height) / 2 + custom_window_placement[1]))
-            cards_left = len(game.deck)
-            cards_left_text = my_font.render(f"Deck size: {cards_left}", False, (0, 0, 0))
-            window.blit(cards_left_text, (custom_window_placement[0], (custom_border_height + cards_left_text.get_height()*2) / 2 + custom_window_placement[1]))
-
             # Some logic where the player can interract with cards on the screen by clicking on them
             if deck_surface.collidepoint(mouse_click_x, mouse_click_y) and turn_state == "DRAW":
                 out_q.put("random")
@@ -469,6 +531,21 @@ def pygame_display(game, out_q, window, clock, FPS):
         window.blit(player_1_wins, (custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8 - player_1_wins.get_height()))
         player_2_wins = my_font.render(f"Wins: {game.players[1].wins}", False, (0, 0, 0))
         window.blit(player_2_wins, (custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3 + player_2_wins.get_height()))
+
+        game_num = game.game_number
+        game_num_text = my_font.render(f"Game: {game_num}", False, (0, 0, 0))
+        window.blit(game_num_text, (custom_window_placement[0], (custom_border_height - game_num_text.get_height()*2) / 2 + custom_window_placement[1]))
+        round_num = game.round_number
+        round_num_text = my_font.render(f"Round: {round_num}", False, (0, 0, 0))
+        window.blit(round_num_text, (custom_window_placement[0], (custom_border_height) / 2 + custom_window_placement[1]))
+        total_round_num = game.total_round_number
+        total_round_num_text = my_font.render(f"Total rounds: {total_round_num}", False, (0, 0, 0))
+        window.blit(total_round_num_text, (custom_window_placement[0], (custom_border_height + total_round_num_text.get_height()*2) / 2 + custom_window_placement[1]))
+
+        # Display stats
+        # stats = pygame.image.load('test.png')
+        # stats_resized = pygame.transform.scale(stats, (int(stats.get_width() // 2), int(stats.get_height() // 2)))
+        # stats_surface = window.blit(stats_resized, (window.get_width() // 2, 0))
 
 
     def display_loop(game, window):
