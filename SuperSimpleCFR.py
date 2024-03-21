@@ -24,7 +24,7 @@ class SuperSimpleCFR:
         #Create the node three
         root = Node(state, None)
         root.create_children_tree(root, EndDepth)
-        root.game_state.print_state()
+        #root.game_state.print_state()
         stage = root.game_state.state
         print("Stage: ", stage)
 
