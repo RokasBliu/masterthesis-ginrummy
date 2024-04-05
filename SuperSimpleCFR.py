@@ -20,7 +20,7 @@ class SuperSimpleCFR:
         #print("Column to insert: ", column_to_insert)
         self.strategies[column_to_insert] = value
 
-    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True):
+    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True, return_number_value = False):
         #Create the node three
         root = Node(state, None)
         root.create_children_tree(root, EndDepth)
@@ -44,6 +44,12 @@ class SuperSimpleCFR:
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
         print(self.strategies)
+
+        if return_number_value:
+            print("Returning number value")
+            print(self.strategies.max(axis=1)[0])
+            return self.strategies.max(axis=1)[0]
+
         best_strategy = self.strategies.idxmax(axis=1)[0]
         if self.strategies.at[0, best_strategy] == 0:
             if stage == "draw":

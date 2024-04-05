@@ -71,4 +71,4 @@ class Stats():
         fig.legend(lines, labels, loc='upper right') 
 
     def finalize_plot():
-        plt.savefig('stats.png')
+        plt.savefig('stats-CFR_8-vs-CFR_8_knocking.png')

@@ -71,7 +71,7 @@ class GinRummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "CFRKnocking":
                 p.is_human = False
 
         self.deck = Deck()
@@ -99,7 +99,7 @@ class GinRummy(object):
         print("Deck size: ", len(self.deck))
         time_diff = 0
         while answering == False:
-            if player.name == "CFR":
+            if player.name == "CFR" or player.name == "CFRKnocking":
                 print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
@@ -147,7 +147,7 @@ class GinRummy(object):
         check_if_int = False
         time_diff = 0
         while check_if_int == False:
-            if player.name == "CFR":
+            if player.name == "CFR" or player.name == "CFRKnocking":
                 print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
@@ -191,11 +191,11 @@ class GinRummy(object):
             player.player_knock = True
             answering = False
             while answering == False:
-                if player.name == "CFR":
+                if player.name == "CFRKnocking":
                     # For now we make that bots knock instantly
                     #Testing for a knocking algorithm
                     knock_answer = self.bot_manager.get_knocking_action(self, "SuperSimpleCFR")
-                elif player.name == "GreedyBot":
+                elif player.name == "GreedyBot" or player.name == "CFR":
                     knock_answer = "y"
                 else:  
                     knock_answer = in_q.get()
@@ -313,7 +313,7 @@ class GinRummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "CFRKnocking":
                 p.is_human = False
 
         self.deck = Deck()
@@ -354,8 +354,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline", "CFRKnocking"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline", "CFRKnocking"], 200, 50)
 
         # Main menu loop
         start_game = False
