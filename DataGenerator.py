@@ -120,7 +120,7 @@ def main():
         print(d)
     df = pd.DataFrame(data, columns=["Player Hand", "Known Cards", "Discard Pile", "Turn Number", "Predicted Score"])
     print(df)
-    df.to_csv("test-data-draw-2.csv")
+    df.to_csv("test-data-draw-3.csv")
     #df.to_excel("test-data.xlsx")
 
 main()

@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, Lambda, Dropout, Flatten
+from keras.layers import Dense, Lambda, Dropout, Flatten, LSTM
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -66,22 +66,21 @@ class NeuralNetManager():
         Total = 35"""
 
         model = Sequential()
-        model.add(Dense(64, input_shape=(3,40), activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(16, activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(1, activation='linear'))
+        model.add(LSTM(128, input_shape=(4, 40), return_sequences=True))
+        model.add(LSTM(128, return_sequences=True))
+        model.add(LSTM(128))
+        model.add(Dense(1))
+
 
         model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mse'])
         model.summary()
         self.model = model
         
-    def transform_data(self, data="test-data-draw.csv"):
+    def transform_data(self, data="test-data-draw-2.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
+
         training_data = data_list[:, 1:-1]
         target_data = data_list[:, -1]
 
@@ -149,21 +148,25 @@ class NeuralNetManager():
                 discard_pile_one_hot[discard_pile[i][j]] = 1
             discard_pile[i] = discard_pile_one_hot
 
-        turn_numbers = training_data[:, 3].tolist()
-        for i in range(len(turn_numbers)):
-            one_hot_turn = [0] * 40
-            one_hot_turn[turn_numbers[i]] = 1
-            turn_numbers[i] = one_hot_turn
+        cards_left_in_deck = [[0 for i in range(40)] for j in range(len(discard_pile))]
+
+        for i in range(len(discard_pile)):
+            cards_left_in_deck[i] = [0]*40
+            for j in range(len(discard_pile[i])):
+                if discard_pile[i][j] == 0 and hand_cards[i][j] == 0 and known_cards[i][j] == 0:
+                    cards_left_in_deck[i][j] = 1
+            
 
         training_data = []
         for i in range(len(hand_cards)):
-            data_to_append = [hand_cards[i]] + [known_cards[i]] + [discard_pile[i]]
+            data_to_append = [hand_cards[i]] + [known_cards[i]] + [discard_pile[i]] + [cards_left_in_deck[i]]
             training_data.append(data_to_append)
 
         #print("Discard pile after embedding:", discard_pile)
         #print("Training data after embedding:", training_data)
 
         #Split data into training and testing
+        #target_data = target_data.reshape(-1, 1)
         target_data = target_data.tolist()
         print("Target data:", target_data)
         x_train, x_test, y_train, y_test = train_test_split(training_data, target_data, test_size=0.2, random_state=42)
@@ -173,7 +176,7 @@ def main():
     nn = NeuralNetManager()
     nn.build_neural_net()
     x_train, x_test, y_train, y_test = nn.transform_data()
-    nn.model.fit(x_train, y_train, epochs=500, batch_size=128, validation_data=(x_test, y_test), verbose=1)
+    nn.model.fit(x_train, y_train, epochs=100, batch_size=128, validation_data=(x_test, y_test), verbose=1)
     loss, mse = nn.model.evaluate(x_test, y_test)
     print("Mean squared error: ", mse)
     predictions = nn.model.predict(x_test)
