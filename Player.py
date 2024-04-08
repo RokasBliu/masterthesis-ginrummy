@@ -15,9 +15,9 @@ class Player(object):
         self.in_play = False
         self.wants_rematch = False
 
-        self.total_turns = 0
-        self.avg_draw_time = 0
-        self.avg_discard_time = 0
+        self.draw_times = []
+        self.discard_times = []
+        self.melds_in_hand_when_discard = []
 
         self.wins_per_game = []
         self.score_per_game = []
@@ -44,10 +44,23 @@ class Player(object):
         return '{0:.3g}'.format(sum(self.round_wins_per_game) / len(self.round_wins_per_game))
     
     def get_avg_draw_time(self):
-        return '{0:.3g}'.format(self.avg_draw_time)
+        return '{0:.3g}'.format(sum(self.draw_times) / len(self.draw_times))
     
     def get_avg_discard_time(self):
-        return '{0:.3g}'.format(self.avg_discard_time)
+        return '{0:.3g}'.format(sum(self.discard_times) / len(self.discard_times))
+    
+    def get_avg_turn_times_per_meld_cards_in_hand(self):
+        times = []
+        i = 0
+        while i < max(self.melds_in_hand_when_discard) + 1:
+            times.extend([[]])
+            i += 1
+        for idx, element in enumerate(self.melds_in_hand_when_discard):
+            times[element].append(self.draw_times[idx] + self.discard_times[idx])
+        avg_times = []
+        for times_per_meld_count in times:
+            avg_times.append(0 if len(times_per_meld_count) == 0 else sum(times_per_meld_count) / len(times_per_meld_count))
+        return avg_times
 
     def __repr__(self):
         return f"{self.name} has a score of {self.score}, with a hand of {self.hand}"
