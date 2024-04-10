@@ -66,10 +66,12 @@ class NeuralNetManager():
         Total = 35"""
 
         model = Sequential()
-        model.add(LSTM(128, input_shape=(4, 40), return_sequences=True))
-        model.add(LSTM(128, return_sequences=True))
-        model.add(LSTM(128))
-        model.add(Dense(1))
+        model.add(Dense(64, input_dim=160, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(32, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(Dense(16, activation='relu'))
+        model.add(Dense(1, activation='linear'))
 
 
         model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mse'])
@@ -159,28 +161,42 @@ class NeuralNetManager():
 
         training_data = []
         for i in range(len(hand_cards)):
-            data_to_append = [hand_cards[i]] + [known_cards[i]] + [discard_pile[i]] + [cards_left_in_deck[i]]
+            data_to_append = hand_cards[i] + known_cards[i] + discard_pile[i] + cards_left_in_deck[i]
             training_data.append(data_to_append)
 
+        draw_phase_training_data = training_data[:int(len(training_data)/2)]
+        discard_phase_training_data = training_data[int(len(training_data)/2):]
         #print("Discard pile after embedding:", discard_pile)
         #print("Training data after embedding:", training_data)
 
         #Split data into training and testing
         #target_data = target_data.reshape(-1, 1)
-        target_data = target_data.tolist()
+        target_data_draw_phase = target_data[:int(len(target_data)/2)].tolist()
+        target_data_discard_phase = target_data[int(len(target_data)/2):].tolist()
+        
+
+
         print("Target data:", target_data)
-        x_train, x_test, y_train, y_test = train_test_split(training_data, target_data, test_size=0.2, random_state=42)
-        return x_train, x_test, y_train, y_test
+        x_train_draw, x_test_draw, y_train_draw, y_test_draw = train_test_split(draw_phase_training_data, target_data_draw_phase, test_size=0.2, random_state=42)
+        x_train_discard, x_test_discard, y_train_discard, y_test_discard = train_test_split(discard_phase_training_data, target_data_discard_phase, test_size=0.2, random_state=42)
+        return x_train_draw, x_test_draw, y_train_draw, y_test_draw, x_train_discard, x_test_discard, y_train_discard, y_test_discard
 
 def main():
-    nn = NeuralNetManager()
-    nn.build_neural_net()
-    x_train, x_test, y_train, y_test = nn.transform_data()
-    nn.model.fit(x_train, y_train, epochs=100, batch_size=128, validation_data=(x_test, y_test), verbose=1)
-    loss, mse = nn.model.evaluate(x_test, y_test)
-    print("Mean squared error: ", mse)
-    predictions = nn.model.predict(x_test)
+    nn_draw = NeuralNetManager()
+    nn_draw.build_neural_net()
+    x_train_draw, x_test_draw, y_train_draw, y_test_draw, x_train_discard, x_test_discard, y_train_discard, y_test_discard = nn_draw.transform_data()
+    nn_draw.model.fit(x_train_draw, y_train_draw, epochs=100, batch_size=128, validation_data=(x_test_draw, y_test_draw), verbose=1)
+
+    nn_discard = NeuralNetManager()
+    nn_discard.build_neural_net()
+    nn_discard.model.fit(x_train_discard, y_train_discard, epochs=100, batch_size=128, validation_data=(x_test_discard, y_test_discard), verbose=1)
+
+    predictions = nn_draw.model.predict(x_test_draw)
     for i in range(10):
-        print("Prediction: ", predictions[i], "Actual: ", y_test[i])
+        print("Prediction: ", predictions[i], "Actual: ", y_test_draw[i])
+
+    predictions = nn_discard.model.predict(x_test_discard)
+    for i in range(10):
+        print("Prediction: ", predictions[i], "Actual: ", y_test_discard[i])
 
 main()

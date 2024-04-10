@@ -8,7 +8,7 @@ class DataGenerator:
     def __init__(self):
         #Using CFR with depth 8 to create data
         self.bot = "SuperSimpleCFR"
-        self.data_amount = 5000
+        self.data_amount = 10000
         pass
 
     def create_random_game_state(self, stage = "draw"):
