@@ -8,8 +8,7 @@ class DataGenerator:
     def __init__(self):
         #Using CFR with depth 8 to create data
         self.bot = "SuperSimpleCFR"
-        self.data_amount = 5000
-        pass
+        self.data_amount = 100000
 
     def create_random_game_state(self, stage = "draw"):
         main_player = Player("main player")
@@ -21,15 +20,15 @@ class DataGenerator:
         
         if stage == "draw":
             for i in range(turn_number):
-                print("Round number: ", rand_game.round_number)
-                print(rand_game.players[rand_game.turn_index].name, "'s turn")
+                # print("Round number: ", rand_game.round_number)
+                # print(rand_game.players[rand_game.turn_index].name, "'s turn")
                 self.draw_rand_state(rand_game, rand_game.players[rand_game.turn_index])
                 self.discard_rand_state(rand_game, rand_game.players[rand_game.turn_index])
 
         else:
             for i in range(turn_number):
-                print("Round number: ", rand_game.round_number)
-                print(rand_game.players[rand_game.turn_index].name, "'s turn")
+                # print("Round number: ", rand_game.round_number)
+                # print(rand_game.players[rand_game.turn_index].name, "'s turn")
                 self.draw_rand_state(rand_game, rand_game.players[rand_game.turn_index])
                 self.discard_rand_state(rand_game, rand_game.players[rand_game.turn_index])
             
@@ -42,15 +41,15 @@ class DataGenerator:
             phantom_card = Card("", "")
             phantom_card.make_phantom_card(rand_game_state.rand_card_dist)
             main_player.hand.add(phantom_card)
-            self.discard_rand_state(rand_game, main_player) 
+            self.discard_rand_state(rand_game, main_player)
         return rand_game
 
     
     def draw_rand_state(self, game, player):
         player.total_turns += 1
-        print("Your hand: ", player.hand.sort_by_rank())
-        print("Top of discard pile: ", game.discard_pile[-1])
-        print("Deck size: ", len(game.deck))
+        # print("Your hand: ", player.hand.sort_by_rank())
+        # print("Top of discard pile: ", game.discard_pile[-1])
+        # print("Deck size: ", len(game.deck))
 
         answers = ["random", "discard"]
         rand_num = random.randint(0,1)
@@ -87,12 +86,12 @@ class DataGenerator:
             game.turn_number += 1
             print("Turn number: ", game.turn_number)
 
-    def create_data_from_game_state(self, state, stage, player, known_cards):
+    def create_data_from_game_state(self, state, stage, player):
         data_array = []
         data_array.append(player.hand.cards)
-        data_array.append(known_cards)
         data_array.append(state.discard_pile)
-        data_array.append(state.turn_number)
+        data_array.append(state.discard_pile[-1])
+        data_array.append(state.bot_manager.known_cards_p1)
         predicted_score = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = True)
         data_array.append(predicted_score)
 
@@ -101,26 +100,26 @@ class DataGenerator:
     def print_state(self, state):
         print("Player hand: ", state.players[0].hand)
         print("Discard pile: ", state.discard_pile)
-        print("Turn number: ", state.turn_number)
+        print("Top of discard pile: ", state.discard_pile[-1])
         print("Known cards: ", state.bot_manager.known_cards_p1)
     
 def main():
     data_gen = DataGenerator()
     data = []
     for i in range(data_gen.data_amount):
-        game = data_gen.create_random_game_state("draw")
-        data_gen.print_state(game)
-        data.append(data_gen.create_data_from_game_state(game, "draw", game.players[0], game.bot_manager.known_cards_p1))
+        game_state = data_gen.create_random_game_state("draw")
+        #data_gen.print_state(game_state)
+        data.append(data_gen.create_data_from_game_state(game_state, "draw", game_state.players[0]))
     for i in range(data_gen.data_amount):
         game = data_gen.create_random_game_state("discard")
-        data_gen.print_state(game)
-        data.append(data_gen.create_data_from_game_state(game, "discard", game.players[0], game.bot_manager.known_cards_p1))
+        #data_gen.print_state(game)
+        data.append(data_gen.create_data_from_game_state(game, "discard", game.players[0]))
 
     for d in data:
         print(d)
-    df = pd.DataFrame(data, columns=["Player Hand", "Known Cards", "Discard Pile", "Turn Number", "Predicted Score"])
+    df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
     print(df)
-    df.to_csv("test-data-draw-3.csv")
+    df.to_csv("test-data-200K.csv")
     #df.to_excel("test-data.xlsx")
 
 main()
