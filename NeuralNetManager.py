@@ -196,6 +196,8 @@ class NeuralNetManager():
             data_to_append = [hand_cards[i]] + [known_cards[i]] + [discard_pile[i]] + [turn_number[i]] #+ [cards_left_in_deck[i]]
             training_data.append(data_to_append)
 
+        draw_phase_training_data = training_data[:int(len(training_data)/2)]
+        discard_phase_training_data = training_data[int(len(training_data)/2):]
         #print("Discard pile after embedding:", discard_pile)
         #print("Training data after embedding:", training_data)
 
@@ -210,7 +212,7 @@ def main():
     nn = NeuralNetManager()
     nn.build_neural_net()
     x_train, x_test, y_train, y_test = nn.transform_data()
-    nn.model.fit(x_train, y_train, epochs=1000, batch_size=100, validation_data=(x_test, y_test), verbose=1)
+    nn.model.fit(x_train, y_train, epochs=100, batch_size=128, validation_data=(x_test, y_test), verbose=1)
     loss, mse = nn.model.evaluate(x_test, y_test)
     print("Mean squared error: ", mse)
     print("Loss: ", loss)
