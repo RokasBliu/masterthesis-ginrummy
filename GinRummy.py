@@ -4,6 +4,7 @@ from HandEvaluator import HandEvaluator
 from Player import Player
 from Hand import Hand
 from queue import Queue
+from BarChart import BarChart
 from DropDownMenu import DropDownMenu
 from Button import Button
 from Stats import Stats
@@ -63,7 +64,6 @@ class GinRummy(object):
     def start_new_round(self):
         self.round_number += 1
         self.total_round_number += 1
-        self.turn_number = 0
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
@@ -71,7 +71,7 @@ class GinRummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR10" or p.name == "CFR8" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "GROCFR":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
                 p.is_human = False
 
         self.deck = Deck()
@@ -93,22 +93,16 @@ class GinRummy(object):
 
     def draw(self, player, in_q):
         answering = False
+        player.total_turns += 1
         print("Your hand: ", player.hand.sort_by_rank())
         print("Top of discard pile: ", self.discard_pile[-1])
         print("Deck size: ", len(self.deck))
         time_diff = 0
         while answering == False:
-            if player.name == "CFR10":
+            if player.name == "CFR":
                 print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
-                end = time.time()
-                time_diff = end - start
-                print(f"{player.name} chose {answer} in {time_diff} seconds")
-            elif player.name == "CFR8":
-                print(f"{player.name} is thinking...")
-                start = time.time()
-                answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self, layers=8)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
@@ -125,12 +119,6 @@ class GinRummy(object):
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
-            elif player.name == "GROCFR":
-                start = time.time()
-                answer = self.bot_manager.get_action_from_bot("draw", "GROCFR", self, layers=8)
-                end = time.time()
-                time_diff = end - start
-                print(f"{player.name} chose {answer} in {time_diff} seconds")
             else:
                 start = time.time()
                 answer = in_q.get()
@@ -140,7 +128,7 @@ class GinRummy(object):
 
             answering = answer.lower() == "random" or answer.lower() == "discard"
 
-        player.draw_times.append(time_diff)
+        player.avg_draw_time = (player.avg_draw_time + time_diff) / player.total_turns
         
         if answer.lower() == "random":
             card_drawn = self.deck.deal()
@@ -159,17 +147,10 @@ class GinRummy(object):
         check_if_int = False
         time_diff = 0
         while check_if_int == False:
-            if player.name == "CFR10":
+            if player.name == "CFR":
                 print(f"{player.name} is thinking...")
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
-                end = time.time()
-                time_diff = end - start
-                print(f"{player.name} chose {answer} in {time_diff} seconds")
-            elif player.name == "CFR8":
-                print(f"{player.name} is thinking...")
-                start = time.time()
-                answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self, layers=8)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
@@ -186,12 +167,6 @@ class GinRummy(object):
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
-            elif player.name == "GROCFR":
-                start = time.time()
-                answer = self.bot_manager.get_action_from_bot("discard", "GROCFR", self, layers=8)
-                end = time.time()
-                time_diff = end - start
-                print(f"{player.name} chose {answer} in {time_diff} seconds")
             else:    
                 answer = in_q.get()
 
@@ -201,8 +176,12 @@ class GinRummy(object):
             except ValueError:
                 check_if_int = False
 
+<<<<<<< HEAD
         # player.melds_in_hand_when_discard.append(0 if self.hand_evaluator.find_best_meld(player.hand) == None else len(self.hand_evaluator.find_best_meld(player.hand)))
         # player.discard_times.append(time_diff)
+=======
+        player.avg_discard_time = (player.avg_discard_time + time_diff) / player.total_turns
+>>>>>>> parent of cf9be63 (removed cards from the tree that are in a meld, added an extra stat tracker)
         
         card = player.hand.cards[int(answer)-1]
         player.hand.cards.remove(card)
@@ -217,14 +196,10 @@ class GinRummy(object):
             player.player_knock = True
             answering = False
             while answering == False:
-                if player.name == "CFR8" or player.name == "CFR10":
+                if player.name == "CFR":
                     # For now we make that bots knock instantly
                     #Testing for a knocking algorithm
                     knock_answer = self.bot_manager.get_knocking_action(self, "SuperSimpleCFR")
-                elif player.name == "CFRBaseline":
-                    knock_answer = self.bot_manager.get_knocking_action(self, "SSCFRBaseline")
-                elif player.name == "GROCFR":
-                    knock_answer = self.bot_manager.get_knocking_action(self, "GROCFR")
                 elif player.name == "GreedyBot":
                     knock_answer = "y"
                 else:  
@@ -297,7 +272,7 @@ class GinRummy(object):
                 p.round_wins_per_game.append(p.round_wins)
 
             Stats.plot(self.game_number, [self.players[0], self.players[1]])
-            Stats.finalize_plot(self.players[0].name, self.players[1].name)
+            Stats.finalize_plot()
 
             # Give option to restart, go to main menu, see stats or close the game
             what_to_do = ["", ""]
@@ -333,6 +308,28 @@ class GinRummy(object):
             self.short_of_card = False
             self.start_new_round()
 
+    def start_new_round(self):
+        self.round_number += 1
+        self.turn_number = 0
+        for p in self.players:
+            p.hand = Hand()
+            p.player_draw = False
+            p.player_discard = False
+            p.player_knock = False
+
+            #A bit spaghetti, but it works
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
+                p.is_human = False
+
+        self.deck = Deck()
+        if self.is_smaller_deck:
+                self.deck.make_smaller_deck()
+        self.deck.shuffle()
+        self.deal(self.is_smaller_deck)
+        self.discard_pile = []
+        self.discard_pile.append(self.deck.deal())
+        self.bot_manager = BotManager()
+
     def game_flow(self, in_q):
         self.start_new_game(True)
         print("------------------")
@@ -362,8 +359,13 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
+<<<<<<< HEAD
         main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR8", "CFR10", "CFRBaseline", "GROCFR"], 200, 50)
         main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR8", "CFR10", "CFRBaseline", "GROCFR"], 200, 50)
+=======
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
+>>>>>>> parent of cf9be63 (removed cards from the tree that are in a meld, added an extra stat tracker)
 
         # Main menu loop
         start_game = False
@@ -550,11 +552,19 @@ def pygame_display(game, out_q, window, clock, FPS):
         total_round_num_text = my_font.render(f"Total rounds: {total_round_num}", False, (0, 0, 0))
         window.blit(total_round_num_text, (custom_window_placement[0], (custom_border_height + total_round_num_text.get_height()*2) / 2 + custom_window_placement[1]))
 
+        # Display stats
+        # stats = pygame.image.load('test.png')
+        # stats_resized = pygame.transform.scale(stats, (int(stats.get_width() // 2), int(stats.get_height() // 2)))
+        # stats_surface = window.blit(stats_resized, (window.get_width() // 2, 0))
+
 
     def display_loop(game, window):
         # For drag and drop
         move_box = None
         inflate_box = None
+
+        # This is just a test chart, will be updated soon
+        # test_chart = BarChart("testChart", 200, 200,  window.get_width() // 2, 0, [1,2,3,4,10,18,24], [4,3,9,2,7,12,5], 1)
         
         while True:
             mouse_click_pos = (0, 0)
