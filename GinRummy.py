@@ -176,12 +176,8 @@ class GinRummy(object):
             except ValueError:
                 check_if_int = False
 
-<<<<<<< HEAD
         # player.melds_in_hand_when_discard.append(0 if self.hand_evaluator.find_best_meld(player.hand) == None else len(self.hand_evaluator.find_best_meld(player.hand)))
         # player.discard_times.append(time_diff)
-=======
-        player.avg_discard_time = (player.avg_discard_time + time_diff) / player.total_turns
->>>>>>> parent of cf9be63 (removed cards from the tree that are in a meld, added an extra stat tracker)
         
         card = player.hand.cards[int(answer)-1]
         player.hand.cards.remove(card)
@@ -359,13 +355,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-<<<<<<< HEAD
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR8", "CFR10", "CFRBaseline", "GROCFR"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR8", "CFR10", "CFRBaseline", "GROCFR"], 200, 50)
-=======
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
->>>>>>> parent of cf9be63 (removed cards from the tree that are in a meld, added an extra stat tracker)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline", "GROCFR"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline", "GROCFR"], 200, 50)
 
         # Main menu loop
         start_game = False
