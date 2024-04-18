@@ -64,6 +64,7 @@ class GinRummy(object):
     def start_new_round(self):
         self.round_number += 1
         self.total_round_number += 1
+        self.turn_number = 0
         for p in self.players:
             p.hand = Hand()
             p.player_draw = False
@@ -71,7 +72,7 @@ class GinRummy(object):
             p.player_knock = False
 
             #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "GROCFR":
                 p.is_human = False
 
         self.deck = Deck()
@@ -93,7 +94,6 @@ class GinRummy(object):
 
     def draw(self, player, in_q):
         answering = False
-        player.total_turns += 1
         print("Your hand: ", player.hand.sort_by_rank())
         print("Top of discard pile: ", self.discard_pile[-1])
         print("Deck size: ", len(self.deck))
@@ -102,20 +102,26 @@ class GinRummy(object):
             if player.name == "CFR":
                 print(f"{player.name} is thinking...")
                 start = time.time()
-                answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self)
+                answer = self.bot_manager.get_action_from_bot("draw", "SuperSimpleCFR", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "CFRBaseline":
                 print(f"{player.name} is thinking...")
                 start = time.time()
-                answer = self.bot_manager.get_action_from_bot("draw", "SSCFRBaseline", self)
+                answer = self.bot_manager.get_action_from_bot("draw", "SSCFRBaseline", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "GreedyBot":
                 start = time.time()
-                answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self)
+                answer = self.bot_manager.get_action_from_bot("draw", "GreedyBot", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "GROCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("draw", "GROCFR", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
@@ -128,7 +134,7 @@ class GinRummy(object):
 
             answering = answer.lower() == "random" or answer.lower() == "discard"
 
-        player.avg_draw_time = (player.avg_draw_time + time_diff) / player.total_turns
+        player.draw_times.append(time_diff)
         
         if answer.lower() == "random":
             card_drawn = self.deck.deal()
@@ -150,20 +156,26 @@ class GinRummy(object):
             if player.name == "CFR":
                 print(f"{player.name} is thinking...")
                 start = time.time()
-                answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self)
+                answer = self.bot_manager.get_action_from_bot("discard", "SuperSimpleCFR", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "CFRBaseline":
                 print(f"{player.name} is thinking...")
                 start = time.time()
-                answer = self.bot_manager.get_action_from_bot("discard", "SSCFRBaseline", self)
+                answer = self.bot_manager.get_action_from_bot("discard", "SSCFRBaseline", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "GreedyBot":
                 start = time.time()
-                answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self)
+                answer = self.bot_manager.get_action_from_bot("discard", "GreedyBot", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "GROCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("discard", "GROCFR", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
@@ -176,12 +188,9 @@ class GinRummy(object):
             except ValueError:
                 check_if_int = False
 
-<<<<<<< HEAD
-        # player.melds_in_hand_when_discard.append(0 if self.hand_evaluator.find_best_meld(player.hand) == None else len(self.hand_evaluator.find_best_meld(player.hand)))
-        # player.discard_times.append(time_diff)
-=======
-        player.avg_discard_time = (player.avg_discard_time + time_diff) / player.total_turns
->>>>>>> parent of cf9be63 (removed cards from the tree that are in a meld, added an extra stat tracker)
+        best_meld = self.hand_evaluator.find_best_meld(player.hand)
+        player.melds_in_hand_when_discard.append(0 if best_meld == None else len(best_meld))
+        player.discard_times.append(time_diff)
         
         card = player.hand.cards[int(answer)-1]
         player.hand.cards.remove(card)
@@ -200,6 +209,10 @@ class GinRummy(object):
                     # For now we make that bots knock instantly
                     #Testing for a knocking algorithm
                     knock_answer = self.bot_manager.get_knocking_action(self, "SuperSimpleCFR")
+                elif player.name == "CFRBaseline":
+                    knock_answer = self.bot_manager.get_knocking_action(self, "SSCFRBaseline")
+                elif player.name == "GROCFR":
+                    knock_answer = self.bot_manager.get_knocking_action(self, "GROCFR")
                 elif player.name == "GreedyBot":
                     knock_answer = "y"
                 else:  
@@ -272,7 +285,7 @@ class GinRummy(object):
                 p.round_wins_per_game.append(p.round_wins)
 
             Stats.plot(self.game_number, [self.players[0], self.players[1]])
-            Stats.finalize_plot()
+            Stats.finalize_plot(self.players[0].name, self.players[1].name)
 
             # Give option to restart, go to main menu, see stats or close the game
             what_to_do = ["", ""]
@@ -349,8 +362,8 @@ class GinRummy(object):
 
             print("Next turn")
 
-def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_name=["Player 2"]):
-    def display_loop(window, player1_name, player2_name):
+def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_name=["Player 2"], player1_depth=["8"], player2_depth=["8"]):
+    def display_loop(window, player1_name, player2_name, player1_depth, player2_depth):
         # Title
         my_font = pygame.font.SysFont('Comic Sans MS', 50)
         title = my_font.render("Gin Rummy", False, (255, 255, 255))
@@ -359,13 +372,13 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-<<<<<<< HEAD
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR8", "CFR10", "CFRBaseline", "GROCFR"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR8", "CFR10", "CFRBaseline", "GROCFR"], 200, 50)
-=======
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
->>>>>>> parent of cf9be63 (removed cards from the tree that are in a meld, added an extra stat tracker)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline", "GROCFR"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline", "GROCFR"], 200, 50)
+
+        # Depth dropdown menu
+        main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["8", "10"], 50, 50)
+        main_menu_depth_p2 = DropDownMenu("main_menu_depth_p2", ["8", "10"], 50, 50)
+
 
         # Main menu loop
         start_game = False
@@ -385,9 +398,13 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
                         if event.button == 1: # Left click
                             main_menu_dropdown_p1.process_click(event.pos)
                             main_menu_dropdown_p2.process_click(event.pos)
+                            main_menu_depth_p1.process_click(event.pos)
+                            main_menu_depth_p2.process_click(event.pos)
                             if start_button.collidepoint(event.pos):
                                 player1_name[0] = main_menu_dropdown_p1.selected_item
                                 player2_name[0] = main_menu_dropdown_p2.selected_item
+                                player1_depth[0] = main_menu_depth_p1.selected_item
+                                player2_depth[0] = main_menu_depth_p2.selected_item
                                 start_game = True
             except KeyboardInterrupt:
                 pygame.quit()
@@ -398,10 +415,12 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
             start_button.draw(window, window.get_width()//2 - 100, window.get_height()//2 - 25)
             main_menu_dropdown_p1.draw(window, window.get_width()//2 - 210, window.get_height()//2 + 50)
             main_menu_dropdown_p2.draw(window, window.get_width()//2 + 10, window.get_height()//2 + 50)
+            main_menu_depth_p1.draw(window, window.get_width()//2 - 50 - 240, window.get_height()//2 + 50)
+            main_menu_depth_p2.draw(window, window.get_width()//2 + 230, window.get_height()//2 + 50)
             pygame.display.update()
             clock.tick(FPS)
     
-    display_loop(window, player1_name, player2_name)
+    display_loop(window, player1_name, player2_name, player1_depth, player2_depth)
 
 def pygame_display(game, out_q, window, clock, FPS):        
     def display_cards(game, window, mouse_click_pos):
@@ -552,12 +571,6 @@ def pygame_display(game, out_q, window, clock, FPS):
         total_round_num_text = my_font.render(f"Total rounds: {total_round_num}", False, (0, 0, 0))
         window.blit(total_round_num_text, (custom_window_placement[0], (custom_border_height + total_round_num_text.get_height()*2) / 2 + custom_window_placement[1]))
 
-        # Display stats
-        # stats = pygame.image.load('test.png')
-        # stats_resized = pygame.transform.scale(stats, (int(stats.get_width() // 2), int(stats.get_height() // 2)))
-        # stats_surface = window.blit(stats_resized, (window.get_width() // 2, 0))
-
-
     def display_loop(game, window):
         # For drag and drop
         move_box = None
@@ -618,7 +631,7 @@ def game_thread(game, in_q):
 
 def main():
     pygame.init()
-    bounds = (1280, 600)
+    bounds = (1800, 900)
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
     pygame.display.set_caption("Gin Rummy")
     clock = pygame.time.Clock()
@@ -630,11 +643,14 @@ def main():
     p1_name = ["Player 1"]
     p2_name = ["Player 2"]
 
-    # Before we start the game, we have to promt the main menu screen where player can choose bots etc.
-    main_menu_display(window, clock, FPS, p1_name, p2_name)
+    p1_depth = ["8"]
+    p2_depth = ["8"]
 
-    player1 = Player(p1_name[0])
-    player2 = Player(p2_name[0])
+    # Before we start the game, we have to promt the main menu screen where player can choose bots etc.
+    main_menu_display(window, clock, FPS, p1_name, p2_name, p1_depth, p2_depth)
+
+    player1 = Player(p1_name[0], int(p1_depth[0]))
+    player2 = Player(p2_name[0], int(p2_depth[0]))
 
     game = GinRummy(player1, player2)
 

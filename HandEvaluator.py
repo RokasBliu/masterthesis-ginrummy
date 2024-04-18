@@ -4,6 +4,7 @@ class HandEvaluator:
     def __init__(self):
         self.lookup_table = LookupTable()
         self.meld_id_counter = 0
+        self.melds = []
 
     #We need to sort by suits, and get both the suits and the values in a tuple
     def get_hand_suits_tuples(self, hand: Hand):
