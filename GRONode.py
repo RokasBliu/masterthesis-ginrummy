@@ -1,5 +1,4 @@
 from copy import deepcopy
-from HandEvaluator import HandEvaluator
 import numpy as np
 
 class GRONode: 
@@ -28,11 +27,10 @@ class GRONode:
             self.children.append(child)
 
         elif self.game_state.state == "discard":
-            hand_ev = HandEvaluator()
             #Make states for each card in hand, exluding cards in melds
             if self.game_state.main_player_index == self.game_state.turn_index:
                 cards_not_in_melds = []
-                best_meld = hand_ev.find_best_meld(self.game_state.main_player_hand)
+                best_meld = self.game_state.main_player_hand.get_best_meld()
                 if best_meld is not None:
                     for card in self.game_state.main_player_hand.cards:
                         if card not in best_meld:

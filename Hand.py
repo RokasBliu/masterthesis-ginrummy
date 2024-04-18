@@ -35,3 +35,50 @@ class Hand(object):
     
     def get_card_rank(self, card_value):
         return self.rank_converter[card_value]
+    
+    def get_best_meld(self):
+        meld_conflict = False
+        if len(self.melds) == 0:
+            return None
+        
+        if len(self.melds) == 1:
+            return self.melds[0]
+
+        for c in self.flatten(self.melds):
+            if len(c.meld_ids) > 1:
+                meld_conflict = True
+                break
+
+        if meld_conflict == False:
+            return self.flatten(self.melds)        
+        else:
+            best_meld = self.melds[0]
+            best_meld_deadwood = 0
+            for c in self.cards:
+                if c not in best_meld:
+                    best_meld_deadwood += self.card_values[c.value]
+
+            # Check if melds can be combined
+            for i in range(len(self.melds)):
+                for j in range(i+1, len(self.melds)):
+                    can_combine = True
+                    # Check for conflict
+                    for c in self.melds[i]:
+                        if c in self.melds[j]:
+                            can_combine = False
+                            break
+                    
+                    if can_combine == True:
+                        self.melds.append(self.melds[i] + self.melds[j])
+
+            for i in range(len(self.melds)):
+                meld_i_deadwood = 0
+                for c in self.cards:
+                    if c not in self.melds[i]:
+                        meld_i_deadwood += self.card_values[c.value]
+
+                if meld_i_deadwood < best_meld_deadwood:
+                    best_meld = self.melds[i]
+                    #best_meld_deadwood = meld_i_deadwood
+
+        return best_meld

@@ -185,7 +185,6 @@ class HandEvaluator:
         if meld_conflict == False:
             return self.flatten(self.melds)        
         else:
-
             best_meld = self.melds[0]
             best_meld_deadwood = 0
             for c in hand.cards:
@@ -204,9 +203,6 @@ class HandEvaluator:
                     
                     if can_combine == True:
                         self.melds.append(self.melds[i] + self.melds[j])
-                    
-                            
-
 
             for i in range(len(self.melds)):
 

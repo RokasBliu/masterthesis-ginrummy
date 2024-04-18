@@ -70,6 +70,7 @@ class GinRummy(object):
             p.player_draw = False
             p.player_discard = False
             p.player_knock = False
+            p.melds_in_hand_when_discard = []
 
             #A bit spaghetti, but it works
             if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "GROCFR":
@@ -320,28 +321,6 @@ class GinRummy(object):
             self.strike_one = False
             self.short_of_card = False
             self.start_new_round()
-
-    def start_new_round(self):
-        self.round_number += 1
-        self.turn_number = 0
-        for p in self.players:
-            p.hand = Hand()
-            p.player_draw = False
-            p.player_discard = False
-            p.player_knock = False
-
-            #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline":
-                p.is_human = False
-
-        self.deck = Deck()
-        if self.is_smaller_deck:
-                self.deck.make_smaller_deck()
-        self.deck.shuffle()
-        self.deal(self.is_smaller_deck)
-        self.discard_pile = []
-        self.discard_pile.append(self.deck.deal())
-        self.bot_manager = BotManager()
 
     def game_flow(self, in_q):
         self.start_new_game(True)

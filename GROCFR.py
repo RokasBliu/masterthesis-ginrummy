@@ -35,7 +35,7 @@ class GROCFR:
                     cards_names.append(cards[i].__str__())
             self.strategies = pd.DataFrame(columns = cards_names, index = list(range(len(root.children)))).astype(float).fillna(0)
 
-        self.traverse(root, root, EndStage, EndDepth)
+        self.traverse(root, EndStage, EndDepth)
         print(self.strategies)
         best_strategy = self.strategies.idxmax(axis=1)[0]
         if self.strategies.at[0, best_strategy] == 0:
@@ -56,19 +56,19 @@ class GROCFR:
         
         return best_strategy
     
-    def traverse(self, node, root, EndStage, EndDepth):
+    def traverse(self, node, EndStage, EndDepth):
         if node.depth == EndDepth or node.game_state.state == EndStage or node.game_state.state == "knock":
             if node.game_state.state == "knock":
                 print("Knock")
                 return 100
-            utility = self.calculate_total_utility(node, root)
+            utility = self.calculate_total_utility(node)
             return utility
         
         if node.depth != 0:
             states = node.children
             utilities = []
             for s in states:
-                utility = self.traverse(s, root, EndStage, EndDepth)
+                utility = self.traverse(s, EndStage, EndDepth)
                 utilities.append(utility)
 
             if node.game_state.main_player_index == node.game_state.turn_index or node.game_state.state == "discard":
@@ -83,7 +83,7 @@ class GROCFR:
             return best_utility
         else:
             for i in range (len(node.children)):
-                utility = self.traverse(node.children[i], root, EndStage, EndDepth)
+                utility = self.traverse(node.children[i], EndStage, EndDepth)
                 self.insert_strategy_via_index(utility, i)
 
             return 0
@@ -113,19 +113,18 @@ class GROCFR:
         return
 
 
-    def calculate_total_utility(self, node, root):
+    def calculate_total_utility(self, node):
         #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
         main_player_exp_deadwood = node.game_state.oracle.get_expected_util_sample(node.game_state.main_player_hand)
-        hand_evaluator = HandEvaluator()
-        exp_p1_utility = hand_evaluator.get_hand_score(root.game_state.main_player_hand) - main_player_exp_deadwood
+        exp_p1_utility = self.best_possible_utility - main_player_exp_deadwood
         exp_p2_utility_dist = node.game_state.opponent_category_dist
         exp_p2_utility_sum = 0
         for i in range(len(exp_p2_utility_dist)):
             exp_p2_utility_sum += exp_p2_utility_dist[i]
 
         tot_exp_utility = exp_p1_utility - exp_p2_utility_sum
-        if tot_exp_utility < 0:
-            tot_exp_utility = 0
+        #if tot_exp_utility < 0:
+            #tot_exp_utility = 0
         #print("Total expected utility: ", tot_exp_utility)
         return tot_exp_utility
     

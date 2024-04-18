@@ -61,6 +61,7 @@ class Stats():
             rects = axis.bar(x + offset, measurement, width, label=attribute)
             #axis.bar_label(rects, padding=3)
             multiplier += 1
+        x = np.arange(len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))  # the label locations
         axis.set_xticks(x + width, tuple(ele for ele in range(0, len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))))
         axis.legend(loc='upper left', ncols=3)
         max_p = max(max(players[0].get_avg_turn_times_per_meld_cards_in_hand()), max(players[1].get_avg_turn_times_per_meld_cards_in_hand()))
