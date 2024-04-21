@@ -90,10 +90,13 @@ class DataGenerator:
         data_array = []
         data_array.append(player.hand.cards)
         data_array.append(state.discard_pile)
-        data_array.append(state.discard_pile[-1])
+        print(state.discard_pile)
+        data_array.append("" if len(state.discard_pile) == 0 else state.discard_pile[-1])
         data_array.append(state.bot_manager.known_cards_p1)
         predicted_score = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = True)
         data_array.append(predicted_score)
+        # predicted_outcome = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = False)
+        # data_array.append(predicted_outcome)
 
         return data_array
 
@@ -104,22 +107,27 @@ class DataGenerator:
         print("Known cards: ", state.bot_manager.known_cards_p1)
     
 def main():
+    file_name = "test-data-discard-100K.csv"
     data_gen = DataGenerator()
     data = []
-    for i in range(data_gen.data_amount):
-        game_state = data_gen.create_random_game_state("draw")
-        #data_gen.print_state(game_state)
-        data.append(data_gen.create_data_from_game_state(game_state, "draw", game_state.players[0]))
+    # for i in range(data_gen.data_amount):
+    #     game_state = data_gen.create_random_game_state("draw")
+    #     data.append(data_gen.create_data_from_game_state(game_state, "draw", game_state.players[0]))
+    #     if i % 1000 == 0:
+    #         df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
+    #         df.to_csv(file_name)
     for i in range(data_gen.data_amount):
         game = data_gen.create_random_game_state("discard")
-        #data_gen.print_state(game)
         data.append(data_gen.create_data_from_game_state(game, "discard", game.players[0]))
+        if i % 1000 == 0:
+            df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
+            df.to_csv(file_name)
 
-    for d in data:
-        print(d)
+    # for d in data:
+    #     print(d)
     df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
-    print(df)
-    df.to_csv("test-data-200K.csv")
+    # print(df)
+    df.to_csv(file_name)
     #df.to_excel("test-data.xlsx")
 
 main()
