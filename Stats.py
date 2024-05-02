@@ -8,11 +8,10 @@ class Stats():
         matplotlib.use('agg')
         # Create plot
         # fig, ax = plt.subplots(nrows=2, ncols=1, squeeze=False)
-        gs_kw = dict(width_ratios=[1, 1], height_ratios=[1, 1, 1])
+        gs_kw = dict(width_ratios=[1, 1], height_ratios=[1, 1])
         fig, ax = plt.subplot_mosaic([['upper left', 'right'],
-                                ['middle left', 'right'],
                                 ['lower left', 'right']],
-                              gridspec_kw=gs_kw, figsize=(14, 14),
+                              gridspec_kw=gs_kw, figsize=(7.5, 7.5),
                               layout="constrained")
         x = x_val
         if type(x_val) is int:
@@ -33,7 +32,7 @@ class Stats():
             ylim=(0, max_score), yticks=np.arange(0, max_score, 20))
         
         # Wins per game plot
-        axis = ax['middle left']
+        axis = ax['lower left']
         axis.set_title("Wins per game")
         axis.set_ylabel("Wins") 
         axis.set_xlabel("Games")
@@ -42,30 +41,30 @@ class Stats():
         axis.set(xlim=(0, x_val), xticks=np.arange(0, x_val+1, 20),
             ylim=(0, x_val), yticks=np.arange(0, x_val+1, 10))
         
-        # Avg. turn time per melds in hand
-        axis = ax['lower left']
-        axis.set_title("Avg. turn time in seconds per melds in hand")
-        axis.set_ylabel("Avg. turn time") 
-        axis.set_xlabel("Melds in hand")
-        player_turn_time_per_melds_in_hand_stats = {
-            f'{players[0].name}': tuple(players[0].get_avg_turn_times_per_meld_cards_in_hand()),
-            f'{players[1].name}': tuple(players[1].get_avg_turn_times_per_meld_cards_in_hand()),
-        }
-        x = np.arange(len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))  # the label locations
-        width = 0.25  # the width of the bars
-        multiplier = 0
-        for attribute, measurement in player_turn_time_per_melds_in_hand_stats.items():
-            offset = width * multiplier
-            if len(x) != len(measurement):
-                x = np.arange(len(measurement))
-            rects = axis.bar(x + offset, measurement, width, label=attribute)
-            #axis.bar_label(rects, padding=3)
-            multiplier += 1
-        x = np.arange(len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))  # the label locations
-        axis.set_xticks(x + width, tuple(ele for ele in range(0, len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))))
-        axis.legend(loc='upper left', ncols=3)
-        max_p = max(max(players[0].get_avg_turn_times_per_meld_cards_in_hand()), max(players[1].get_avg_turn_times_per_meld_cards_in_hand()))
-        axis.set_ylim(0, max_p * 1.1)
+        # # Avg. turn time per melds in hand
+        # axis = ax['lower left']
+        # axis.set_title("Avg. turn time in seconds per melds in hand")
+        # axis.set_ylabel("Avg. turn time") 
+        # axis.set_xlabel("Melds in hand")
+        # player_turn_time_per_melds_in_hand_stats = {
+        #     f'{players[0].name}': tuple(players[0].get_avg_turn_times_per_meld_cards_in_hand()),
+        #     f'{players[1].name}': tuple(players[1].get_avg_turn_times_per_meld_cards_in_hand()),
+        # }
+        # x = np.arange(len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))  # the label locations
+        # width = 0.25  # the width of the bars
+        # multiplier = 0
+        # for attribute, measurement in player_turn_time_per_melds_in_hand_stats.items():
+        #     offset = width * multiplier
+        #     if len(x) != len(measurement):
+        #         x = np.arange(len(measurement))
+        #     rects = axis.bar(x + offset, measurement, width, label=attribute)
+        #     #axis.bar_label(rects, padding=3)
+        #     multiplier += 1
+        # x = np.arange(len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))  # the label locations
+        # axis.set_xticks(x + width, tuple(ele for ele in range(0, len(players[0].get_avg_turn_times_per_meld_cards_in_hand()))))
+        # axis.legend(loc='upper left', ncols=3)
+        # max_p = max(max(players[0].get_avg_turn_times_per_meld_cards_in_hand()), max(players[1].get_avg_turn_times_per_meld_cards_in_hand()))
+        # axis.set_ylim(0, max_p * 1.1)
         
         # Table
         axis = ax['right']

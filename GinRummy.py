@@ -453,13 +453,13 @@ def pygame_display(game, out_q, window, clock, FPS):
                 player_i -= 1
 
             # Display player text
-            my_font = pygame.font.SysFont('Comic Sans MS', 30 // (screen_height // window_height))
+            my_font = pygame.font.SysFont('Comic Sans MS', 20)
             player_1_text = my_font.render(game.players[0].name, False, (0, 0, 0))
             window.blit(player_1_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8))
             player_2_text = my_font.render(game.players[1].name, False, (0, 0, 0))
             window.blit(player_2_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_window_placement[1] - (window_height - custom_border_height)/3))
 
-            my_font = pygame.font.SysFont('Comic Sans MS', 10 // (screen_height // window_height))
+            my_font = pygame.font.SysFont('Comic Sans MS', 10)
             player_1_text = my_font.render(f"{game.players[0].total_score}", False, (0, 0, 0))
             window.blit(player_1_text, (custom_border_width/2 - player_1_text.get_width()/2 + custom_window_placement[0], custom_border_height + custom_window_placement[1] + (window_height - custom_border_height)/8))
             player_2_text = my_font.render(f"{game.players[1].total_score}", False, (0, 0, 0))
@@ -467,7 +467,7 @@ def pygame_display(game, out_q, window, clock, FPS):
 
 
             # Display player turn
-            my_font = pygame.font.SysFont('Comic Sans MS', 20 // (screen_height // window_height))
+            my_font = pygame.font.SysFont('Comic Sans MS', 20)
             player_turn = game.turn_index
             turn_state = "DRAW"
             if len(game.players[player_turn].hand.cards) > game.SMALLER_NUM_CARDS_PER_HAND if game.is_smaller_deck else game.NORMAL_NUM_CARDS_PER_HAND:
@@ -514,7 +514,7 @@ def pygame_display(game, out_q, window, clock, FPS):
             for p in game.players:
                 if p.wants_rematch == True:
                     num_players_wanting_rematch += 1
-            my_font = pygame.font.SysFont('Comic Sans MS', 20 // (screen_height // window_height))
+            my_font = pygame.font.SysFont('Comic Sans MS', 20)
             restart_text = my_font.render(f"Do you want a rematch? {num_players_wanting_rematch}/2", False, (0, 0, 0))
             window.blit(restart_text, (custom_window_placement[0] + custom_border_width/2 - restart_text.get_width()/2, (custom_border_height - restart_text.get_height()) / 2 + custom_window_placement[1]))
 
@@ -610,7 +610,7 @@ def game_thread(game, in_q):
 
 def main():
     pygame.init()
-    bounds = (1800, 900)
+    bounds = (1500, 500)
     window = pygame.display.set_mode(bounds, pygame.RESIZABLE)
     pygame.display.set_caption("Gin Rummy")
     clock = pygame.time.Clock()
