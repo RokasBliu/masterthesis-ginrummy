@@ -93,10 +93,9 @@ class DataGenerator:
         print(state.discard_pile)
         data_array.append("" if len(state.discard_pile) == 0 else state.discard_pile[-1])
         data_array.append(state.bot_manager.known_cards_p1)
-        predicted_score = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = True)
+        predicted_outcome, predicted_score = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = False)
         data_array.append(predicted_score)
-        # predicted_outcome = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = False)
-        # data_array.append(predicted_outcome)
+        data_array.append(predicted_outcome)
 
         return data_array
 
@@ -107,21 +106,27 @@ class DataGenerator:
         print("Known cards: ", state.bot_manager.known_cards_p1)
     
 def main():
-    file_name = "test-data-discard-100K.csv"
+    file_name = "draw-100K-both-values.csv"
     data_gen = DataGenerator()
-    data = []
+    try:
+        data = pd.read_csv(file_name).reset_index(drop=True, inplace=False).values.tolist()
+        for array in data:
+            array.pop(0)
+        #print(data)
+    except:
+        data = []
+    for i in range(data_gen.data_amount):
+        game_state = data_gen.create_random_game_state("draw")
+        data.append(data_gen.create_data_from_game_state(game_state, "draw", game_state.players[0]))
+        if i % 1000 == 0:
+            df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction outcome", "Prediction score"])
+            df.to_csv(file_name)
     # for i in range(data_gen.data_amount):
-    #     game_state = data_gen.create_random_game_state("draw")
-    #     data.append(data_gen.create_data_from_game_state(game_state, "draw", game_state.players[0]))
+    #     game = data_gen.create_random_game_state("discard")
+    #     data.append(data_gen.create_data_from_game_state(game, "discard", game.players[0]))
     #     if i % 1000 == 0:
     #         df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
     #         df.to_csv(file_name)
-    for i in range(data_gen.data_amount):
-        game = data_gen.create_random_game_state("discard")
-        data.append(data_gen.create_data_from_game_state(game, "discard", game.players[0]))
-        if i % 1000 == 0:
-            df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
-            df.to_csv(file_name)
 
     # for d in data:
     #     print(d)

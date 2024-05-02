@@ -71,23 +71,20 @@ class NeuralNetManager():
 
         model = Sequential()
 
-        # model.add(LSTM(64, input_shape=(4, self.bits), return_sequences=True))
-        # model.add(LSTM(32, return_sequences=True))
-        # model.add(LSTM(8))
+        model.add(LSTM(64, input_shape=(4, self.bits), return_sequences=True))
+        model.add(LSTM(32, return_sequences=True))
+        model.add(LSTM(8))
         # model.add(Dense(1))
-        model.add(Dense(64, input_shape=(4, self.bits), activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(16, activation='relu'))
+        # model.add(Dense(16, input_shape=(4, self.bits), activation='relu'))
+        # model.add(Dense(8, activation='relu'))
         model.add(Flatten())
-        model.add(Dense(1, activation='sigmoid'))
+        model.add(Dense(2, activation='sigmoid'))
 
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.summary()
         self.model = model
         
-    def transform_data(self, data="test-data-draw-simple.csv"):
+    def transform_data(self, data="draw-100K-both-values.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
@@ -159,9 +156,9 @@ class NeuralNetManager():
         converted_target_data = []
         for prediction in target_data:
             if prediction == "random":
-                converted_target_data.append(0)
+                converted_target_data.append([0, 1])
             elif prediction == "discard":
-                converted_target_data.append(1)
+                converted_target_data.append([1, 0])
             else:
                 converted_target_data.append(self.card_to_value_mapping[prediction])
         #target_data = target_data.tolist()

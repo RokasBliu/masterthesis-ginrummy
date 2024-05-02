@@ -70,10 +70,10 @@ class NeuralNetManager():
         # model.add(LSTM(32, return_sequences=True))
         # model.add(LSTM(8))
         # model.add(Dense(1))
-        model.add(Dense(256, activation='relu', input_shape=(4, self.bits)))
-        model.add(Dropout(0.2))
-        model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.2))
+        model.add(Dense(64, activation='relu', input_shape=(4, self.bits)))
+        # model.add(Dropout(0.2))
+        # model.add(Dense(128, activation='relu'))
+        # model.add(Dropout(0.2))
         model.add(Dense(64, activation='relu'))
         model.add(Dropout(0.2))
         model.add(Dense(32, activation='relu'))
@@ -86,7 +86,7 @@ class NeuralNetManager():
         model.summary()
         self.model = model
         
-    def transform_data(self, data="test-data-draw-3.csv"):
+    def transform_data(self, data="test-data-draw-100K.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
@@ -102,98 +102,52 @@ class NeuralNetManager():
             phantom_counter = 0
             hand_cards[i] = hand_cards[i][1:-1].split(", ")
             hand_cards_one_hot = [0] * self.bits
-            # if len(hand_cards[i]) < self.handSize:
-            #     hand_cards[i].extend(["0"] * (self.handSize - len(hand_cards[i])))
             for j in range(len(hand_cards[i])):
                 if hand_cards[i][j] == '':
                     continue
                 if hand_cards[i][j] == "Phantom Card":
-                    #hand_cards[i][j] = self.card_to_value_mapping["Phantom Card"] + phantom_counter
                     hand_cards_one_hot[self.card_to_value_mapping["Phantom Card"] + phantom_counter] = 1
                     phantom_counter += 1
                 else:
                     hand_cards_one_hot[self.card_to_value_mapping[hand_cards[i][j]]] = 1
-                    #hand_cards[i][j] = self.card_to_value_mapping[hand_cards[i][j]]  
             hand_cards[i] = hand_cards_one_hot
+
+        #Discard pile
+        discard_pile = training_data[:, 1]
         
-        #Hot one encoding of hand cards
-        # for i in range(len(hand_cards)):
-        #     hand_cards_one_hot = [0] * 40
-        #     for j in range(len(hand_cards[i])):
-        #         if hand_cards[i][j] < 0:
-        #             continue
-        #         hand_cards_one_hot[hand_cards[i][j]] = 1
-        #     hand_cards[i] = hand_cards_one_hot
-
-        #print("Hand cards after one hot encoding:", hand_cards)
-
-        #Known cards
-        known_cards = training_data[:, 1]
-
-        for i in range(len(known_cards)):
-            known_cards[i] = known_cards[i][1:-1].split(", ")
-            known_cards_one_hot = [0] * self.bits
-            # if len(known_cards[i]) < self.maxKnownCards:
-            #     known_cards[i].extend(["0"] * (self.maxKnownCards - len(known_cards[i])))
-            for j in range(len(known_cards[i])):
-                if known_cards[i][j] == '':
-                    continue
-                # known_cards[i][j] = self.card_to_value_mapping[known_cards[i][j]]
-                known_cards_one_hot[self.card_to_value_mapping[known_cards[i][j]]] = 1
-            known_cards[i] = known_cards_one_hot
-
-        # for i in range(len(known_cards)):
-        #     known_cards_one_hot = [0] * 40
-        #     for j in range(len(known_cards[i])):
-        #         if known_cards[i][j] < 0:
-        #             continue
-        #         known_cards_one_hot[known_cards[i][j]] = 1
-        #     known_cards[i] = known_cards_one_hot
-
-        #print("Known cards after embedding:", known_cards)
-
-        discard_pile = training_data[:, 2]
-
         for i in range(len(discard_pile)):
             discard_pile[i] = discard_pile[i][1:-1].split(", ")
             discard_pile_one_hot = [0] * self.bits
-            # if len(discard_pile[i]) < self.maxDiscardPile:
-            #     discard_pile[i].extend(["0"] * (self.maxDiscardPile - len(discard_pile[i])))
             for j in range(len(discard_pile[i])):
                 if discard_pile[i][j] == '':
                     continue
-                # discard_pile[i][j] = self.card_to_value_mapping[discard_pile[i][j]]
                 discard_pile_one_hot[self.card_to_value_mapping[discard_pile[i][j]]] = 1
             discard_pile[i] = discard_pile_one_hot
+
+        #Top of discard pile
+        top_of_discard_pile = training_data[:, 2]
         
-        # for i in range(len(discard_pile)):
-        #     discard_pile_one_hot = [0] * 40
-        #     for j in range(len(discard_pile[i])):
-        #         if discard_pile[i][j] < 0:
-        #             continue
-        #         discard_pile_one_hot[discard_pile[i][j]] = 1
-        #     discard_pile[i] = discard_pile_one_hot
+        for i in range(len(top_of_discard_pile)):
+            top_of_discard_pile_one_hot = [0] * self.bits
+            top_of_discard_pile_one_hot[self.card_to_value_mapping[top_of_discard_pile[i]]] = 1
+            top_of_discard_pile[i] = top_of_discard_pile_one_hot
 
-        # cards_left_in_deck = [[0 for i in range(40)] for j in range(len(discard_pile))]
-
-        # for i in range(len(discard_pile)):
-        #     cards_left_in_deck[i] = [0]*40
-        #     for j in range(len(discard_pile[i])):
-        #         if discard_pile[i][j] == 0 and hand_cards[i][j] == 0 and known_cards[i][j] == 0:
-        #             cards_left_in_deck[i][j] = 1
-
-        turn_number = training_data[:, -2]
-        for i in range(len(turn_number)):
-            turn_number_one_hot = [0] * self.bits
-            for j in range(turn_number[i]):
-                if j > self.bits:
-                    break
-                turn_number_one_hot[j] = 1
-            turn_number[i] = turn_number_one_hot
+        #Known cards
+        known_cards = training_data[:, 3]
+        
+        for i in range(len(known_cards)):
+            if known_cards[i] is str:
+                known_cards[i] = known_cards[i][1:-1].split(", ")
+            known_cards_one_hot = [0] * self.bits
+            for j in range(len(known_cards[i])):
+                if known_cards[i][j] not in self.card_to_value_mapping:
+                    continue
+                known_cards_one_hot[self.card_to_value_mapping[known_cards[i][j]]] = 1
+            known_cards[i] = known_cards_one_hot
 
         training_data = []
         for i in range(len(hand_cards)):
-            data_to_append = [hand_cards[i]] + [known_cards[i]] + [discard_pile[i]] + [turn_number[i]] #+ [cards_left_in_deck[i]]
+            data_to_append = [hand_cards[i]] + [discard_pile[i]] + [top_of_discard_pile[i]] + [known_cards[i]]
             training_data.append(data_to_append)
 
         draw_phase_training_data = training_data[:int(len(training_data)/2)]

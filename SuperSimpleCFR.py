@@ -68,7 +68,7 @@ class SuperSimpleCFR:
                     break
         
 
-        return best_strategy
+        return best_strategy, self.strategies.max(axis=1)[0]
     
     def traverse(self, node, EndStage, EndDepth):
         #print("Traversing")
