@@ -355,8 +355,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline", "GROCFR"], 200, 50)
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline", "GROCFR"], 200, 50)
 
         # Main menu loop
         start_game = False
