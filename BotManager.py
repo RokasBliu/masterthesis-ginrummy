@@ -1,12 +1,14 @@
 from GameState import GameState
+from RandomBot import RandomBot
 from SSCFRBaseline import SSCFRBaseline
 from SuperSimpleCFR import SuperSimpleCFR
 from GreedyBot import GreedyBot
+from BetterRandomBot import BetterRandomBot
 class BotManager:
     def __init__(self):
         self.known_cards_p1 = []
         self.known_cards_p2 = []
-        self.bots = ["SuperSimpleCFR", "GreedyBot"]
+        self.bots = ["SuperSimpleCFR", "GreedyBot", "RandomBot", "BetterRandomBot"]
         pass
     
     def check_if_bot_exists(self, bot):
@@ -42,13 +44,19 @@ class BotManager:
 
         if bot == "SuperSimpleCFR":
             sscfr = SuperSimpleCFR()
-            return sscfr.resolve(game_state, "end_game", 10, 1)
+            return sscfr.resolve(game_state, "end_game", 8, 1)
         elif bot == "SSCFRBaseline":
             sscfr = SSCFRBaseline()
             return sscfr.resolve(game_state, "end_game", 8, 1)
         elif bot == "GreedyBot":
             gb = GreedyBot()
             return gb.get_action(game_state)
+        elif bot == "RandomBot":
+            random = RandomBot()
+            return random.get_action(game_state)
+        elif bot == "BetterRandomBot":
+            random = BetterRandomBot()
+            return random.get_action(game_state)
         else:
             print("Bot not found")
             return

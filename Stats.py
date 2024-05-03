@@ -71,4 +71,5 @@ class Stats():
         fig.legend(lines, labels, loc='upper right') 
 
     def finalize_plot():
-        plt.savefig('stats_random_bot.png')
+        plt.savefig('stats_better_random_bot_vs_CFR_8.png')
+        pass

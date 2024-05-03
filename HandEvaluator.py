@@ -29,7 +29,7 @@ class HandEvaluator:
     def flatten(self, list):
         return [item for sublist in list for item in sublist]
     
-    def get_hand_score(self, hand: Hand, wants_melds_returned = False):
+    def get_hand_score(self, hand: Hand, wants_melds_returned = False, wants_best_meld = False):
         hand.deadwood = 0
         self.melds = []
         self.meld_id_counter = 0
@@ -160,9 +160,12 @@ class HandEvaluator:
             for c in hand.cards:
                 if c not in best_meld:
                     hand.deadwood += hand.card_values[c.value]
-        
+
         if wants_melds_returned:
             return hand.deadwood, self.melds
+        
+        if wants_best_meld:
+            return hand.deadwood, best_meld
 
         return hand.deadwood
     
