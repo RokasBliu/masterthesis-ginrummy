@@ -106,7 +106,7 @@ class DataGenerator:
         print("Known cards: ", state.bot_manager.known_cards_p1)
     
 def main():
-    file_name = "draw-100K-both-values.csv"
+    file_name = "discard-100K-both-values.csv"
     data_gen = DataGenerator()
     try:
         data = pd.read_csv(file_name).reset_index(drop=True, inplace=False).values.tolist()
@@ -116,8 +116,8 @@ def main():
     except:
         data = []
     for i in range(data_gen.data_amount):
-        game_state = data_gen.create_random_game_state("draw")
-        data.append(data_gen.create_data_from_game_state(game_state, "draw", game_state.players[0]))
+        game_state = data_gen.create_random_game_state("discard")
+        data.append(data_gen.create_data_from_game_state(game_state, "discard", game_state.players[0]))
         if i % 1000 == 0:
             df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction outcome", "Prediction score"])
             df.to_csv(file_name)
@@ -130,7 +130,7 @@ def main():
 
     # for d in data:
     #     print(d)
-    df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction"])
+    df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction outcome", "Prediction score"])
     # print(df)
     df.to_csv(file_name)
     #df.to_excel("test-data.xlsx")

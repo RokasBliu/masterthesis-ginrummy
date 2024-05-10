@@ -51,7 +51,7 @@ class SuperSimpleCFR:
             return self.strategies.max(axis=1)[0]
 
         best_strategy = self.strategies.idxmax(axis=1)[0]
-        if self.strategies.at[0, best_strategy] == 0:
+        if (self.strategies.at[0, best_strategy] == 0).all():
             if stage == "draw":
                 best_strategy = "random"
             else:

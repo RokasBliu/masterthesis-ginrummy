@@ -71,10 +71,7 @@ class NeuralNetManager():
         # model.add(LSTM(8))
         # model.add(Dense(1))
         model.add(Dense(64, activation='relu', input_shape=(4, self.bits)))
-        # model.add(Dropout(0.2))
-        # model.add(Dense(128, activation='relu'))
-        # model.add(Dropout(0.2))
-        model.add(Dense(64, activation='relu'))
+        #model.add(Dense(64, activation='relu'))
         model.add(Dropout(0.2))
         model.add(Dense(32, activation='relu'))
         model.add(Dropout(0.2))
@@ -86,13 +83,13 @@ class NeuralNetManager():
         model.summary()
         self.model = model
         
-    def transform_data(self, data="test-data-draw-100K.csv"):
+    def transform_data(self, data="discard-100K-both-values.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
 
         training_data = data_list[:, 1:-1]
-        target_data = data_list[:, -1]
+        target_data = data_list[:, -2]
 
         #Embedding and converting data to numbers
 
@@ -129,7 +126,8 @@ class NeuralNetManager():
         
         for i in range(len(top_of_discard_pile)):
             top_of_discard_pile_one_hot = [0] * self.bits
-            top_of_discard_pile_one_hot[self.card_to_value_mapping[top_of_discard_pile[i]]] = 1
+            if top_of_discard_pile[i] == top_of_discard_pile[i]:
+                top_of_discard_pile_one_hot[self.card_to_value_mapping[top_of_discard_pile[i]]] = 1
             top_of_discard_pile[i] = top_of_discard_pile_one_hot
 
         #Known cards
