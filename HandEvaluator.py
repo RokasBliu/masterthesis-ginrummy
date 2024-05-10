@@ -4,6 +4,7 @@ class HandEvaluator:
     def __init__(self):
         self.lookup_table = LookupTable()
         self.meld_id_counter = 0
+        self.melds = []
 
     #We need to sort by suits, and get both the suits and the values in a tuple
     def get_hand_suits_tuples(self, hand: Hand):
@@ -184,7 +185,6 @@ class HandEvaluator:
         if meld_conflict == False:
             return self.flatten(self.melds)        
         else:
-
             best_meld = self.melds[0]
             best_meld_deadwood = 0
             for c in hand.cards:
@@ -203,9 +203,6 @@ class HandEvaluator:
                     
                     if can_combine == True:
                         self.melds.append(self.melds[i] + self.melds[j])
-                    
-                            
-
 
             for i in range(len(self.melds)):
 

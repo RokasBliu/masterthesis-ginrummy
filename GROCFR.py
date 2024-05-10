@@ -1,10 +1,9 @@
-#from Game_State import Game_State
-#from Gin_Oracle import Gin_Oracle
 import random
-from Node import Node
+from GRONode import GRONode
 import pandas as pd
+from HandEvaluator import HandEvaluator
 
-class SuperSimpleCFR:
+class GROCFR:
     def __init__(self):
         self.strategies = None
         self.regret_sum = {}
@@ -13,49 +12,37 @@ class SuperSimpleCFR:
         self.end_states_dist = []
     
     def insert_strategy_via_index(self, value, index):
-        #get all the strategy rows
         column_names = self.strategies.columns
-        #print("Column names: ", column_names)
         column_to_insert = column_names[index]
-        #print("Column to insert: ", column_to_insert)
         self.strategies[column_to_insert] = value
 
-    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True, return_number_value = False):
+    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True):
         #Create the node three
-        root = Node(state, None)
+        root = GRONode(state, None)
         root.create_children_tree(root, EndDepth)
-        root.game_state.print_state()
+        #root.game_state.print_state()
         stage = root.game_state.state
         print("Stage: ", stage)
 
         if stage == "draw":
-            #Important that theese strategies are in the same order as it is in the game_state
+            #Important that these strategies are in the same order as it is in the game_state
             self.strategies = pd.DataFrame({"discard": [0], "random": [0]})
         elif stage == "discard":
-            if smallDeck:
-                cards_names = []
-                cards = root.game_state.main_player_hand.cards
-                for i in range(len(cards)):
-                    if cards[i].just_drew is False:
-                        cards_names.append(cards[i].__str__())
-                self.strategies = pd.DataFrame(columns = cards_names, index = list(range(len(root.children)))).fillna(0)
+            cards_names = []
+            cards = root.game_state.main_player_hand.cards
+            for i in range(len(cards)):
+                if cards[i].just_drew is False:
+                    cards_names.append(cards[i].__str__())
+            self.strategies = pd.DataFrame(columns = cards_names, index = list(range(len(root.children)))).astype(float).fillna(0)
 
-        #for i in range(iterations):
         self.traverse(root, EndStage, EndDepth)
-        #self.strategies = self.update_strategies()
         print(self.strategies)
-
-        if return_number_value:
-            print("Returning number value")
-            print(self.strategies.max(axis=1)[0])
-            return self.strategies.max(axis=1)[0]
-
         best_strategy = self.strategies.idxmax(axis=1)[0]
-        if (self.strategies.at[0, best_strategy] == 0).all():
+        if self.strategies.at[0, best_strategy] == 0:
             if stage == "draw":
                 best_strategy = "random"
             else:
-            #Choose a random card to discard
+                #Choose a random card to discard
                 random_index = random.randint(0, len(root.children) - 1)
                 best_strategy = self.strategies.columns[random_index]
                 
@@ -67,13 +54,10 @@ class SuperSimpleCFR:
                     best_strategy = i + 1
                     break
         
-
         return best_strategy
     
     def traverse(self, node, EndStage, EndDepth):
-        #print("Traversing")
         if node.depth == EndDepth or node.game_state.state == EndStage or node.game_state.state == "knock":
-            #print("End reached")
             if node.game_state.state == "knock":
                 print("Knock")
                 return 100
@@ -89,18 +73,14 @@ class SuperSimpleCFR:
 
             if node.game_state.main_player_index == node.game_state.turn_index or node.game_state.state == "discard":
                 best_utility = max(utilities)
-            
             else:
                 self.basyian_update(node)
                 best_utility = 0
                 for i in range(len(utilities)):
                     u = utilities[i] * states[i].game_state.probability
                     best_utility += u
-                    #print("Best utility: ", best_utility)
-                    #print("Probability: ", states[i].game_state.probability)
                     
             return best_utility
-        
         else:
             for i in range (len(node.children)):
                 utility = self.traverse(node.children[i], EndStage, EndDepth)
@@ -108,9 +88,6 @@ class SuperSimpleCFR:
 
             return 0
 
-                
-
-    
     def update_strategies(self):
         return
 

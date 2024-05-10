@@ -18,12 +18,12 @@ class GameState(object):
         self.state = state
         self.probability = 1
 
-        #self.hand_evaluator = game.hand_evaluator
-        #self.main_player_deadwood = self.hand_evaluator.get_hand_score(self.main_player_hand)
-        #self.main_player_expected_utility = self.main_player_deadwood
-        #self.main_player_score = self.main_player.score
+        self.hand_evaluator = game.hand_evaluator
+        self.main_player_deadwood = self.hand_evaluator.get_hand_score(self.main_player_hand)
+        self.main_player_expected_utility = self.main_player_deadwood
+        self.main_player_score = self.main_player.score
 
-        #self.other_player_score = game.players[(self.turn_index + 1) % 2].score
+        self.other_player_score = game.players[(self.turn_index + 1) % 2].score
         self.discard_pile = game.discard_pile
         if len(self.discard_pile) > 0:
             self.top_card_discard_pile = self.discard_pile[-1]
@@ -32,7 +32,7 @@ class GameState(object):
         self.opponent_category_dist = np.zeros(7) #TODO: Make this more accurate
         self.rand_card_dist = []
         self.oracle = GinOracle()
-        #self.action = None
+        self.action = None
 
         #Calculate random cards available
         rand_deck = Deck()
@@ -127,7 +127,7 @@ class GameState(object):
     def knock(self):
         return self.main_player_expected_utility <= 10
     
-    """def print_state(self):
+    def print_state(self):
         print("--------------------")
         print("State: ", self.state)
         print("Round number: ", self.round_number)
@@ -139,4 +139,4 @@ class GameState(object):
         #print("Top card of discard pile: ", self.top_card_discard_pile)
         print("Known cards: ", self.opponent_known_cards)
         #print("Opponent category distribution: ", self.opponent_category_dist)
-        #print("Random card distribution: ", self.rand_card_dist)"""
+        #print("Random card distribution: ", self.rand_card_dist)
