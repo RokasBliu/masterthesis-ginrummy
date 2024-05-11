@@ -122,7 +122,7 @@ class NeuralNetBinary():
         model.summary()
         self.model = model
         
-    def transform_data(self, data="discard-100K-both-values.csv"):
+    def transform_data(self, data="draw-100K-both-values.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
@@ -216,7 +216,7 @@ class NeuralNetBinary():
 
 def main():
     nn = NeuralNetBinary()
-    nn.build_neural_net(action="discard")
+    nn.build_neural_net(action="draw")
     x_train, x_test, y_train, y_test = nn.transform_data()
     print(np.shape(np.array(x_train)))
     nn.model.fit(x_train, y_train, epochs=20, batch_size=100, validation_data=(x_test, y_test), verbose=1)

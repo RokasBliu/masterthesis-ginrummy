@@ -46,7 +46,7 @@ class DataGenerator:
 
     
     def draw_rand_state(self, game, player):
-        player.total_turns += 1
+        #player.total_turns += 1
         # print("Your hand: ", player.hand.sort_by_rank())
         # print("Top of discard pile: ", game.discard_pile[-1])
         # print("Deck size: ", len(game.deck))
