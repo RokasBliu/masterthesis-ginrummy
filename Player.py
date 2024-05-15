@@ -1,7 +1,7 @@
 from Hand import Hand
 
 class Player(object):
-    def __init__(self, name, depth):
+    def __init__(self, name, depth=8):
         self.name = name
         self.hand = Hand()
         self.score = 0

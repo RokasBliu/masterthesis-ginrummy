@@ -34,7 +34,7 @@ class BotManager:
             if card in self.known_cards_p1:
                 self.known_cards_p1.remove(card)
     
-    def get_action_from_bot(self, stage, bot, game, layers=8):
+    def get_action_from_bot(self, stage, bot, game, layers=8, return_number_value = False):
         if game.turn_index == 0:
             known_cards = self.known_cards_p1
         else:
@@ -44,7 +44,7 @@ class BotManager:
 
         if bot == "SuperSimpleCFR":
             sscfr = SuperSimpleCFR()
-            return sscfr.resolve(game_state, "end_game", layers, 1)
+            return sscfr.resolve(game_state, "end_game", layers, 1, return_number_value = return_number_value)
         elif bot == "SSCFRBaseline":
             sscfr = SSCFRBaseline()
             return sscfr.resolve(game_state, "end_game", 8, 1)
