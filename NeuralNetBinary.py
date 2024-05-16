@@ -227,6 +227,7 @@ def main():
     for i in range(10):
         print("Prediction: ", predictions[i], "Actual: ", y_test[i])
 
+    nn.model.save("draw_binary_model.h5")
 main()
 
 

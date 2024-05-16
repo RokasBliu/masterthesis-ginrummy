@@ -5,11 +5,12 @@ from SSCFRBaseline import SSCFRBaseline
 from SuperSimpleCFR import SuperSimpleCFR
 from GreedyBot import GreedyBot
 from BetterRandomBot import BetterRandomBot
+from DeepLearningCFR import DeepLearningCFR
 class BotManager:
     def __init__(self):
         self.known_cards_p1 = []
         self.known_cards_p2 = []
-        self.bots = ["SSCFRBaseline", "SuperSimpleCFR", "GreedyBot", "RandomBot", "BetterRandomBot", "GROCFR"]
+        self.bots = ["SSCFRBaseline", "SuperSimpleCFR", "GreedyBot", "RandomBot", "BetterRandomBot", "GROCFR", "DeepLearningCFR"]
     
     def check_if_bot_exists(self, bot):
         for b in self.bots:
@@ -42,6 +43,9 @@ class BotManager:
         
         game_state = GameState(game, stage, known_cards)
 
+        if bot == "DeepLearningCFR":
+            dlcfr = DeepLearningCFR()
+            return dlcfr.resolve(game_state, "end_game", layers, 1)
         if bot == "SuperSimpleCFR":
             sscfr = SuperSimpleCFR()
             return sscfr.resolve(game_state, "end_game", layers, 1, return_number_value = return_number_value)
@@ -72,5 +76,9 @@ class BotManager:
             game_state = GameState(game, "draw", [])
             grocfr = GROCFR()
             return grocfr.knocking_strategy_rule_based(game_state)
+        if bot == "DeepLearningCFR":
+            game_state = GameState(game, "draw", [])
+            dlcfr = DeepLearningCFR()
+            return dlcfr.knocking_strategy_rule_based(game_state)
         else:
             return "y"
