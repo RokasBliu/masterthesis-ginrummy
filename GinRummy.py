@@ -375,8 +375,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR"], 200, 50)
 
         # Depth dropdown menu
-        main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["8", "10"], 50, 50)
-        main_menu_depth_p2 = DropDownMenu("main_menu_depth_p2", ["8", "10"], 50, 50)
+        main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["6", "8", "10"], 50, 50)
+        main_menu_depth_p2 = DropDownMenu("main_menu_depth_p2", ["6", "8", "10"], 50, 50)
 
         # Main menu loop
         start_game = False

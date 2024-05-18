@@ -141,22 +141,28 @@ class DeepLearningCFR:
     def calculate_total_utility(self, node):
         #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
         state = node.game_state
+        stage = state.state
         
-        #if state.main_player_index == state.turn_index:
-        #    if stage == "draw":
-        #        print("Draw, main player turn")
-        #        return self.calculate_total_utility(node.parent)
-        #    elif stage == "discard":
-        #        print("Discard, main player turn")
-        #else:
-        #    print("Opponent turn")
-        #    return self.calculate_total_utility(node.parent)
+        #Correct stage if for the binary model
+        if state.main_player_index == state.turn_index:
+            if stage == "draw":
+                return self.calculate_total_utility(node.parent)
+        else:
+            return self.calculate_total_utility(node.parent)
 
 
         encoded_data = self.get_one_hot_encoding(state.main_player_hand.cards, state.discard_pile, state.top_card_discard_pile, state.opponent_known_cards)
-        prediction = self.discard_model.predict(encoded_data, verbose = 0)
+        prediction_discard = self.discard_model.predict(encoded_data, verbose = 0)
 
-        return prediction[0][0]
+        #Predict binary draw
+        if node.parent is not None:
+            draw_state = node.parent.game_state
+            encoded_data = self.get_one_hot_encoding(draw_state.main_player_hand.cards, draw_state.discard_pile, draw_state.top_card_discard_pile, draw_state.opponent_known_cards)
+            prediction_draw = self.draw_model.predict(encoded_data, verbose = 0)
+
+        tot_pred_utility = prediction_discard[0][0]*prediction_draw[0][0] + prediction_discard[0][0]*prediction_draw[0][1]
+
+        return tot_pred_utility
     
     def get_one_hot_encoding(self, hand_cards, discard_pile, top_of_discard_pile, known_cards):
 
