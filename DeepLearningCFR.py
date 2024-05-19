@@ -1,7 +1,7 @@
 #from Game_State import Game_State
 #from Gin_Oracle import Gin_Oracle
 import random
-from Node import Node
+from Node_DLCFR import Node
 import pandas as pd
 import keras
 from NeuralNetManager import NeuralNetManager
@@ -79,7 +79,7 @@ class DeepLearningCFR:
     
     def traverse(self, node, EndStage, EndDepth):
         #print("Traversing")
-        if node.depth == EndDepth or node.game_state.state == EndStage or node.game_state.state == "knock":
+        if node.depth == EndDepth - 1 or node.game_state.state == EndStage or node.game_state.state == "knock":
             #print("End reached")
             if node.game_state.state == "knock":
                 print("Knock")
@@ -139,30 +139,27 @@ class DeepLearningCFR:
 
 
     def calculate_total_utility(self, node):
-        #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
         state = node.game_state
         stage = state.state
-        
-        #Correct stage if for the binary model
-        if state.main_player_index == state.turn_index:
-            if stage == "draw":
-                return self.calculate_total_utility(node.parent)
-        else:
+
+        if node.parent is None:
+            return 0
+
+        #Find discard
+        if stage == "discard" or state.main_player_index != state.turn_index:
             return self.calculate_total_utility(node.parent)
-
-
+            
         encoded_data = self.get_one_hot_encoding(state.main_player_hand.cards, state.discard_pile, state.top_card_discard_pile, state.opponent_known_cards)
-        prediction_discard = self.discard_model.predict(encoded_data, verbose = 0)
+        parent_binaries = self.draw_model.predict(encoded_data, verbose = 0)
 
-        #Predict binary draw
-        if node.parent is not None:
-            draw_state = node.parent.game_state
-            encoded_data = self.get_one_hot_encoding(draw_state.main_player_hand.cards, draw_state.discard_pile, draw_state.top_card_discard_pile, draw_state.opponent_known_cards)
-            prediction_draw = self.draw_model.predict(encoded_data, verbose = 0)
-
-        tot_pred_utility = prediction_discard[0][0]*prediction_draw[0][0] + prediction_discard[0][0]*prediction_draw[0][1]
-
-        return tot_pred_utility
+        tot_utility = 0
+        for i in range(len(node.children)):
+            c = node.children[i].game_state
+            encoded_data = self.get_one_hot_encoding(c.main_player_hand.cards, c.discard_pile, c.top_card_discard_pile, c.opponent_known_cards)
+            pred = self.discard_model.predict(encoded_data, verbose = 0)
+            tot_utility += pred[0][0]*parent_binaries[0][i]
+        
+        return tot_utility
     
     def get_one_hot_encoding(self, hand_cards, discard_pile, top_of_discard_pile, known_cards):
 
