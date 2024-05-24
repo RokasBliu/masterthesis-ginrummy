@@ -1,7 +1,7 @@
 #from Game_State import Game_State
 #from Gin_Oracle import Gin_Oracle
 import random
-from Node_DLCFR import Node
+from Node import Node
 import pandas as pd
 import keras
 from NeuralNetManager import NeuralNetManager
@@ -146,7 +146,7 @@ class DeepLearningCFR:
             return 0
 
         #Find discard
-        if stage == "discard" or state.main_player_index != state.turn_index:
+        if stage == "discard":
             return self.calculate_total_utility(node.parent)
             
         encoded_data = self.get_one_hot_encoding(state.main_player_hand.cards, state.discard_pile, state.top_card_discard_pile, state.opponent_known_cards)

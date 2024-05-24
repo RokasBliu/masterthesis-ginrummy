@@ -371,8 +371,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR"], 200, 50) #RandomBot, RandomBot2 CFRKnocking, CFRBaseline
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR", "RandomBot2"], 200, 50) #RandomBot, RandomBot2 CFRKnocking, CFRBaseline
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR", "RandomBot2"], 200, 50)
 
         # Depth dropdown menu
         main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["6", "8", "10"], 50, 50)
@@ -655,12 +655,13 @@ def main():
     q = Queue() # used for communicating between threads
 
     # Running game logic on a seperate daemon thread
-    game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
-    game.thread.start()
+    #game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
+    #game.thread.start()
 
     # This main thread will be running the display
-    pygame_display(game, q, window, clock, FPS)
+    #pygame_display(game, q, window, clock, FPS)
     pygame.quit()
+    game_thread(game, q)
 
 if __name__ == "__main__":
     main()

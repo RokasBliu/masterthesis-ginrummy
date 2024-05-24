@@ -100,6 +100,6 @@ class Stats():
         # fig.legend(lines, labels, loc='upper right') 
 
     def finalize_plot(name_bot1, name_bot2):
-        #fig_path = f'stats/stats-{name_bot1}-vs-{name_bot2}-{date.today().strftime("%m-%d-%Y")}.png'
-        #plt.savefig(fig_path)
+        fig_path = f'stats/stats-{name_bot1}-vs-{name_bot2}-{date.today().strftime("%m-%d-%Y")}3.png'
+        plt.savefig(fig_path)
         pass

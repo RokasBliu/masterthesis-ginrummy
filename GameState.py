@@ -19,8 +19,8 @@ class GameState(object):
         self.probability = 1
 
         self.hand_evaluator = game.hand_evaluator
-        self.main_player_deadwood = self.hand_evaluator.get_hand_score(self.main_player_hand)
-        self.main_player_expected_utility = self.main_player_deadwood
+        #self.main_player_deadwood = self.hand_evaluator.get_hand_score(self.main_player_hand)
+        #self.main_player_expected_utility = self.main_player_deadwood
         self.main_player_score = self.main_player.score
 
         self.other_player_score = game.players[(self.turn_index + 1) % 2].score
@@ -133,8 +133,8 @@ class GameState(object):
         print("Round number: ", self.round_number)
         #print("Action done this turn: ", self.action)
         print("Main player's hand: ", self.main_player_hand)
-        print("Main player's deadwood: ", self.main_player_deadwood)
-        print("Main player's expected utility: ", self.main_player_expected_utility)
+        #print("Main player's deadwood: ", self.main_player_deadwood)
+#       print("Main player's expected utility: ", self.main_player_expected_utility)
         print("Discard pile: ", self.discard_pile)
         #print("Top card of discard pile: ", self.top_card_discard_pile)
         print("Known cards: ", self.opponent_known_cards)

@@ -77,28 +77,42 @@ class NeuralNetManager():
         #model.add(Dropout(0.2))
         #model.add(Dense(16, activation='relu'))
         #model.add(Flatten())
-        #model.add(Dense(1, activation='linear'))
+        #model.add(Dense(8, activation='linear'))
 
         model.add(LSTM(32, input_shape=(4, len(self.one_hot_bits)), return_sequences=True))
         model.add(LSTM(16, return_sequences=True))
         model.add(LSTM(8))
-        model.add(Dense(8, activation='sigmoid'))
+        model.add(Dense(8, activation='linear'))
 
-        #model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mse'])
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
+        #model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.summary()
         self.model = model
         
-    def transform_data(self, data="discard-100K-both-values.csv"):
+    def transform_data(self, data="discard-100K-3-values.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
 
+
         training_data = data_list[:, 1:]
         target_data = data_list[:, -1]
+        
+        
+        for i in range(len(target_data)):
+            target_data[i] = target_data[i][1:-1].split(", ")
+            for j in range(len(target_data[i])):
+                #float with 2 decimal points
+                target_data[i][j] = round(float(target_data[i][j]), 1)
+        
+        for i in range(len(target_data)):
+            if len(target_data[i]) < 8:
+                target_data[i] = target_data[i] + [0] * (8 - len(target_data[i]))
 
         #Embedding and converting data to numbers
 
+        #print("Training data: ", training_data)
+        #print("Target data: ", target_data.tolist())
         #Hand cards
         hand_cards = training_data[:, 0]
         hand_cards_sorted = []
@@ -162,23 +176,28 @@ class NeuralNetManager():
             training_data.append(data_to_append)
 
 
-        converted_target_data = []
+        #converted_target_data = []
 
-        for i in range(len(target_data)):
-            
-            target_data_one_hot = [0] * 8
-            target_data_one_hot[int(target_data[i]) - 1] = 1
-            converted_target_data.append(target_data_one_hot)
+        #for i in range(len(target_data)):   
+            #target_data_one_hot = [0] * 8
+            #target_data_one_hot[int(target_data[i]) - 1] = 1
+            #converted_target_data.append(target_data_one_hot)
 
-        target_data = converted_target_data
-        x_train, x_test, y_train, y_test = train_test_split(training_data, target_data, test_size=0.2, random_state=42)
+        for i, item in enumerate(target_data[:10]):  # Change 5 to a larger number if necessary
+            print(f"Element {i}: {item}")
+            print(f"Element {i}: length: {len(item)}")
+
+        print("shape of training data: ", np.array(training_data).shape)
+        print("shape of target data: ", np.array(target_data.tolist()).shape)
+        
+        x_train, x_test, y_train, y_test = train_test_split(training_data, target_data.tolist(), test_size=0.2, random_state=42)
         return x_train, x_test, y_train, y_test
 
 def main():
     nn = NeuralNetManager()
     nn.build_neural_net()
     x_train, x_test, y_train, y_test = nn.transform_data()
-    nn.model.fit(x_train, y_train, epochs=20, batch_size=128, validation_data=(x_test, y_test), verbose=1)
+    nn.model.fit(x_train, y_train, epochs=200, batch_size=128, validation_data=(x_test, y_test), verbose=1)
     loss, mse = nn.model.evaluate(x_test, y_test)
     print("Mean squared error: ", mse)
     print("Loss: ", loss)
@@ -187,5 +206,6 @@ def main():
     for i in range(10):
         print("Prediction: ", predictions[i], "Actual: ", y_test[i])
 
-    #nn.model.save("discard_phase_binary_model.h5")
+    nn.model.save("discard_phase_array_model.h5")
+    #nn.model.save("discard_phase_binary_model.h5")  
 #main()
