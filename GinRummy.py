@@ -655,8 +655,8 @@ def main():
     q = Queue() # used for communicating between threads
 
     # Running game logic on a seperate daemon thread
-    #game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
-    #game.thread.start()
+    # game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=False)
+    # game.thread.start()
 
     # This main thread will be running the display
     #pygame_display(game, q, window, clock, FPS)
