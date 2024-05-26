@@ -144,28 +144,25 @@ class DeepLearningCFR:
         stage = state.state
         #----- For disard predict score + predict binary ------#
 
-        #if node.parent is None:
-        #    return 0
+        if node.parent is None:
+            return 0
 
         #Find discard
-        #if stage == "discard":
-        #    return self.calculate_total_utility(node.parent)
+        if stage == "discard":
+           return self.calculate_total_utility(node.parent)
             
-        #encoded_data = self.get_one_hot_encoding(state.main_player_hand.cards, state.discard_pile, state.top_card_discard_pile, state.opponent_known_cards)
-        #parent_binaries = self.draw_model.predict(encoded_data, verbose = 0)
-
-        #tot_utility = 0
-        #for i in range(len(node.children)):
-        #    c = node.children[i].game_state
-        #    encoded_data = self.get_one_hot_encoding(c.main_player_hand.cards, c.discard_pile, c.top_card_discard_pile, c.opponent_known_cards)
-        #    pred = self.discard_model.predict(encoded_data, verbose = 0)
-        #    tot_utility += pred[0][0]*parent_binaries[0][i]
-        
         encoded_data = self.get_one_hot_encoding(state.main_player_hand.cards, state.discard_pile, state.top_card_discard_pile, state.opponent_known_cards)
-        pred = self.discard_array_model.predict(encoded_data, verbose = 0)
-        max_score = max(pred[0])
+        parent_binaries = self.draw_model.predict(encoded_data, verbose = 0)
 
-        return max_score
+        tot_utility = 0
+        for i in range(len(node.children)):
+            c = node.children[i].game_state
+            encoded_data = self.get_one_hot_encoding(c.main_player_hand.cards, c.discard_pile, c.top_card_discard_pile, c.opponent_known_cards)
+            pred = self.discard_array_model.predict(encoded_data, verbose = 0)
+            max_score = max(pred[0])
+            tot_utility += max_score*parent_binaries[0][i]
+
+        return tot_utility
     
     def get_one_hot_encoding(self, hand_cards, discard_pile, top_of_discard_pile, known_cards):
 
