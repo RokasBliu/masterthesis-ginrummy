@@ -79,9 +79,10 @@ class NeuralNetManager():
         #model.add(Flatten())
         #model.add(Dense(8, activation='linear'))
 
-        model.add(LSTM(32, input_shape=(4, len(self.one_hot_bits)), return_sequences=True))
-        model.add(LSTM(16, return_sequences=True))
-        model.add(LSTM(8))
+        model.add(LSTM(128, input_shape=(4, len(self.one_hot_bits)), return_sequences=True))
+        model.add(LSTM(64, return_sequences=True))
+        model.add(LSTM(32, return_sequences=True))
+        model.add(LSTM(16))
         model.add(Dense(8, activation='linear'))
 
         model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
@@ -197,7 +198,7 @@ def main():
     nn = NeuralNetManager()
     nn.build_neural_net()
     x_train, x_test, y_train, y_test = nn.transform_data()
-    nn.model.fit(x_train, y_train, epochs=200, batch_size=128, validation_data=(x_test, y_test), verbose=1)
+    nn.model.fit(x_train, y_train, epochs=80, batch_size=128, validation_data=(x_test, y_test), verbose=1)
     loss, mse = nn.model.evaluate(x_test, y_test)
     print("Mean squared error: ", mse)
     print("Loss: ", loss)
@@ -206,6 +207,6 @@ def main():
     for i in range(10):
         print("Prediction: ", predictions[i], "Actual: ", y_test[i])
 
-    nn.model.save("discard_phase_array_model.h5")
+    #nn.model.save("discard_phase_array_model.h5")
     #nn.model.save("discard_phase_binary_model.h5")  
 #main()
