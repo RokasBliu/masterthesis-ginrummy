@@ -88,6 +88,8 @@ class DLMCCFR:
             if node.game_state.state == "knock":
                 print("Knock")
                 return 100
+            if node.game_state.state == "end_game":
+                return -100
             utility = self.calculate_total_utility(node)
             return utility
         
