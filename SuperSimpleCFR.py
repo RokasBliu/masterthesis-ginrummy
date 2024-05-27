@@ -3,7 +3,6 @@
 import random
 from Node import Node
 import pandas as pd
-import numpy as np
 
 class SuperSimpleCFR:
     def __init__(self):
@@ -21,7 +20,7 @@ class SuperSimpleCFR:
         #print("Column to insert: ", column_to_insert)
         self.strategies[column_to_insert] = value
 
-    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True, return_number_value = False, return_array = False):
+    def resolve(self, state, EndStage, EndDepth, smallDeck = True, return_number_value = False, return_array = False):
         #Create the node three
         root = Node(state, None)
         root.create_children_tree(root, EndDepth)
@@ -116,12 +115,6 @@ class SuperSimpleCFR:
                 self.insert_strategy_via_index(utility, i)
 
             return 0
-
-                
-
-    
-    def update_strategies(self):
-        return
 
     #TODO: test if this makes the bot better
     def basyian_update(self, node):

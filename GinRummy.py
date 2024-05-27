@@ -132,6 +132,12 @@ class GinRummy(object):
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "DLMCCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("draw", "DLMCCFR", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "RandomBot":
                 answer = self.bot_manager.get_action_from_bot("draw", "RandomBot", self)
             elif player.name == "RandomBot2":
@@ -196,6 +202,12 @@ class GinRummy(object):
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "DLMCCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("discard", "DLMCCFR", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "RandomBot":
                 answer = self.bot_manager.get_action_from_bot("discard", "RandomBot", self)
             elif player.name == "RandomBot2":
@@ -234,6 +246,8 @@ class GinRummy(object):
                     knock_answer = self.bot_manager.get_knocking_action(self, "SSCFRBaseline")
                 elif player.name == "GROCFR":
                     knock_answer = self.bot_manager.get_knocking_action(self, "GROCFR")
+                elif player.name == "DLMCCFR":
+                    knock_answer = self.bot_manager.get_knocking_action(self, "DLMCCFR")
                 elif player.name == "GreedyBot" or player.name == "CFR" or player.name == "RandomBot" or player.name == "RandomBot2":
                     knock_answer = "y"
                 else:  
@@ -371,8 +385,8 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR", "RandomBot2"], 200, 50) #RandomBot, RandomBot2 CFRKnocking, CFRBaseline
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "GROCFR", "DeepLearningCFR", "RandomBot2"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "DeepLearningCFR", "DLMCCFR"], 200, 50) #RandomBot, RandomBot2 CFRKnocking, CFRBaseline, RandomBot2, GROCFR 
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "DeepLearningCFR", "DLMCCFR"], 200, 50)
 
         # Depth dropdown menu
         main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["6", "8", "10"], 50, 50)

@@ -1,25 +1,19 @@
 #from Game_State import Game_State
 #from Gin_Oracle import Gin_Oracle
 import random
-from Node import Node
+from Node_DLCFR import Node_DLCFR
+from NeuralNetManager import NeuralNetManager
 import pandas as pd
 import keras
-from NeuralNetManager import NeuralNetManager
 
-class DeepLearningCFR:
-    def __init__(self, nn_draw = None, nn_discard = None, nn_array_discard = None):
+class DLMCCFR:
+    def __init__(self):
         self.strategies = None
         self.regret_sum = {}
         self.strategy_sum = {}
         self.best_possible_utility = 70
         self.end_states_dist = []
-        self.state = None
-
-        self.nn_manager = NeuralNetManager()
-        self.draw_model = nn_draw
-        self.discard_model = nn_discard
-        self.discard_array_model = nn_array_discard
-        
+        self.nn_array_discard = keras.models.load_model("discard_phase_array_model.h5")
     
     def insert_strategy_via_index(self, value, index):
         #get all the strategy rows
@@ -29,9 +23,9 @@ class DeepLearningCFR:
         #print("Column to insert: ", column_to_insert)
         self.strategies[column_to_insert] = value
 
-    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True, return_number_value = False):
+    def resolve(self, state, EndStage, EndDepth, smallDeck = True, return_number_value = False, return_array = False):
         #Create the node three
-        root = Node(state, None)
+        root = Node_DLCFR(state, None, NeuralNetManager(), self.nn_array_discard)
         root.create_children_tree(root, EndDepth)
         root.game_state.print_state()
         stage = root.game_state.state
@@ -52,12 +46,7 @@ class DeepLearningCFR:
         #for i in range(iterations):
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
-        print(self.strategies)
-
-        if return_number_value:
-            print("Returning number value")
-            print(self.strategies.max(axis=1)[0])
-            return self.strategies.max(axis=1)[0]
+        #print(self.strategies)
 
         best_strategy = self.strategies.idxmax(axis=1)[0]
         if (self.strategies.at[0, best_strategy] == 0).all():
@@ -68,7 +57,7 @@ class DeepLearningCFR:
                 random_index = random.randint(0, len(root.children) - 1)
                 best_strategy = self.strategies.columns[random_index]
                 
-        print("Best strategy: ", best_strategy)
+        #print("Best strategy: ", best_strategy)
 
         if stage == "discard":
             for i in range(len(root.game_state.main_player_hand.cards)):
@@ -76,12 +65,25 @@ class DeepLearningCFR:
                     best_strategy = i + 1
                     break
         
+        if return_number_value:
+            print("Returning number value")
+            print(self.strategies.max(axis=1)[0])
+            return best_strategy, self.strategies.max(axis=1)[0]
+        
+        if return_array:
+            #create array of cards from column names
+            card_array = []
+            for i in range(len(cards)):
+                    if cards[i].just_drew is False:
+                        card_array.append(cards[i])
+
+            return best_strategy, self.strategies.iloc[0].values.tolist(), self.strategies.max(axis=1)[0], card_array
 
         return best_strategy
     
     def traverse(self, node, EndStage, EndDepth):
         #print("Traversing")
-        if node.depth == EndDepth - 1 or node.game_state.state == EndStage or node.game_state.state == "knock":
+        if node.depth == EndDepth or node.game_state.state == EndStage or node.game_state.state == "knock":
             #print("End reached")
             if node.game_state.state == "knock":
                 print("Knock")
@@ -117,7 +119,6 @@ class DeepLearningCFR:
 
             return 0
 
-
     #TODO: test if this makes the bot better
     def basyian_update(self, node):
         other_player_utilities = []
@@ -141,60 +142,20 @@ class DeepLearningCFR:
 
 
     def calculate_total_utility(self, node):
-        state = node.game_state
-        stage = state.state
-        #----- For disard predict score + predict binary ------#
+        #Deadwood is better the lower it is, therefore we subtract it from 70, which is the highest possible deadwood
+        main_player_exp_deadwood = node.game_state.oracle.get_expected_util_sample(node.game_state.main_player_hand)
+        exp_p1_utility = self.best_possible_utility - main_player_exp_deadwood
+        exp_p2_utility_dist = node.game_state.opponent_category_dist
+        exp_p2_utility_sum = 0
+        for i in range(len(exp_p2_utility_dist)):
+            exp_p2_utility_sum += exp_p2_utility_dist[i]
 
-        if node.parent is None:
-            return 0
-
-        #Find discard
-        if stage == "discard":
-           return self.calculate_total_utility(node.parent)
-            
-        encoded_data = self.get_one_hot_encoding(state.main_player_hand.cards, state.discard_pile, state.top_card_discard_pile, state.opponent_known_cards)
-        parent_binaries = self.draw_model.predict(encoded_data, verbose = 0)
-
-        tot_utility = 0
-        for i in range(len(node.children)):
-            c = node.children[i].game_state
-            encoded_data = self.get_one_hot_encoding(c.main_player_hand.cards, c.discard_pile, c.top_card_discard_pile, c.opponent_known_cards)
-            pred = self.discard_array_model.predict(encoded_data, verbose = 0)
-            max_score = max(pred[0])
-            tot_utility += max_score*parent_binaries[0][i]
-
-        return tot_utility
+        tot_exp_utility = exp_p1_utility - exp_p2_utility_sum
+        #if tot_exp_utility < 0:
+            #tot_exp_utility = 0
+        #print("Total expected utility: ", tot_exp_utility)
+        return tot_exp_utility
     
-    def get_one_hot_encoding(self, hand_cards, discard_pile, top_of_discard_pile, known_cards):
-
-        #Convert the cards to one hot encoding
-        hand_cards_one_hot = [0] * self.nn_manager.bits
-        phantom_counter = 0
-        for i in range(len(hand_cards)):
-            if hand_cards[i].isPhantom:
-                hand_cards_one_hot[self.nn_manager.card_to_value_mapping["Phantom Card"] + phantom_counter] = 1
-                phantom_counter += 1
-            else:
-                hand_cards_one_hot[self.nn_manager.card_to_value_mapping[str(hand_cards[i])]] = 1
-
-
-        #Discard pile
-        discard_pile_one_hot = [0] * self.nn_manager.bits
-        for i in range(len(discard_pile)):
-            discard_pile_one_hot[self.nn_manager.card_to_value_mapping[str(discard_pile[i])]] = 1
-        
-        #Top of discard pile
-        top_of_discard_pile_one_hot = [0] * self.nn_manager.bits
-        top_of_discard_pile_one_hot[self.nn_manager.card_to_value_mapping[str(top_of_discard_pile)]] = 1
-
-        #Known cards
-        known_cards_one_hot = [0] * self.nn_manager.bits
-        for i in range(len(known_cards)):
-            known_cards_one_hot[self.nn_manager.card_to_value_mapping[str(known_cards[i])]] = 1
-        
-
-        return [[hand_cards_one_hot] + [discard_pile_one_hot] + [top_of_discard_pile_one_hot] + [known_cards_one_hot]]
-
     def knocking_strategy_rule_based(self, state):
             hand_evaluator = state.oracle.hand_evaluator
             deadwood, melds = hand_evaluator.get_hand_score(state.main_player_hand, True)
@@ -219,3 +180,12 @@ class DeepLearningCFR:
                     return "n"
             
             return "y"
+
+
+                
+
+            
+
+            
+            
+            

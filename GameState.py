@@ -25,8 +25,11 @@ class GameState(object):
 
         self.other_player_score = game.players[(self.turn_index + 1) % 2].score
         self.discard_pile = game.discard_pile
+
         if len(self.discard_pile) > 0:
             self.top_card_discard_pile = self.discard_pile[-1]
+        else:
+            self.top_card_discard_pile = None
 
         self.opponent_known_cards = opponent_known_cards
         self.opponent_category_dist = np.zeros(7) #TODO: Make this more accurate
