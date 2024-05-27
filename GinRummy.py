@@ -73,7 +73,7 @@ class GinRummy(object):
             p.melds_in_hand_when_discard = []
 
             #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "CFRKnocking" or p.name == "RandomBot" or p.name == "RandomBot2" or p.name == "GROCFR" or p.name == "DeepLearningCFR":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "CFRKnocking" or p.name == "RandomBot" or p.name == "RandomBot2" or p.name == "GROCFR" or p.name == "DeepLearningCFR" or p.name == "DLMCCFR":
                 p.is_human = False
 
         self.deck = Deck()

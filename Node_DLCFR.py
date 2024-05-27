@@ -90,7 +90,8 @@ class Node_DLCFR:
         
         #Top of discard pile
         top_of_discard_pile_one_hot = [0] * nn_manager.bits
-        top_of_discard_pile_one_hot[nn_manager.card_to_value_mapping[str(top_of_discard_pile)]] = 1
+        if top_of_discard_pile is not None:
+            top_of_discard_pile_one_hot[nn_manager.card_to_value_mapping[str(top_of_discard_pile)]] = 1
 
         #Known cards
         known_cards_one_hot = [0] * nn_manager.bits
