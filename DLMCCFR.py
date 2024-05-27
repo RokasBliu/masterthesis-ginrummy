@@ -46,7 +46,7 @@ class DLMCCFR:
         #for i in range(iterations):
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
-        #print(self.strategies)
+        print(self.strategies)
 
         best_strategy = self.strategies.idxmax(axis=1)[0]
         if (self.strategies.at[0, best_strategy] == 0).all():
@@ -113,7 +113,7 @@ class DLMCCFR:
             return best_utility
         
         else:
-            for i in range (len(node.children)):
+            for i in range(len(node.children)):
                 utility = self.traverse(node.children[i], EndStage, EndDepth)
                 self.insert_strategy_via_index(utility, i)
 

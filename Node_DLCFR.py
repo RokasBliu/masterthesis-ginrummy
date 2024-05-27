@@ -1,6 +1,4 @@
 from copy import deepcopy
-import keras
-from NeuralNetManager import NeuralNetManager
 import heapq
 class Node_DLCFR: 
     def __init__(self, game_state, parent=None, nn_manager = None, predicator = None):
@@ -41,14 +39,20 @@ class Node_DLCFR:
                 prediction = self.predicator.predict(encoded_values, verbose=0)[0]
                 best_4_indexes = heapq.nlargest(4, range(len(prediction)), prediction.take)
 
-                for i in best_4_indexes:
+                for i in range(len(self.game_state.main_player_hand.cards)):
                     c = self.game_state.main_player_hand.cards[i]
-                    if c.just_drew is False:
+                    if c.just_drew is False and i in best_4_indexes:
                         new_state = deepcopy(self.game_state)
                         child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
                         child.game_state.discard_from_hand(c)
                         self.children.append(child)
-                        
+                    
+                    else:
+                        if c.just_drew is False:
+                            new_state = deepcopy(self.game_state)
+                            child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
+                            child.game_state.state = "end_game"
+                            self.children.append(child)
             else:
                 new_state = deepcopy(self.game_state)
                 child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
