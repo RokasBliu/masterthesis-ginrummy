@@ -92,6 +92,7 @@ class GinRummy(object):
         for i in range(num_cards):
             for p in self.players:
                 p.hand.add(self.deck.deal())
+        p.hand.sort_by_rank()
 
     def draw(self, player, in_q):
         answering = False
