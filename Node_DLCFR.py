@@ -41,18 +41,17 @@ class Node_DLCFR:
 
                 for i in range(len(self.game_state.main_player_hand.cards)):
                     c = self.game_state.main_player_hand.cards[i]
-                    if c.just_drew is False and i in best_4_indexes:
-                        new_state = deepcopy(self.game_state)
-                        child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
-                        child.game_state.discard_from_hand(c)
-                        self.children.append(child)
+                    if c.just_drew:
+                        continue
                     
-                    else:
-                        if c.just_drew is False:
-                            new_state = deepcopy(self.game_state)
-                            child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
-                            child.game_state.state = "end_game"
-                            self.children.append(child)
+                    new_state = deepcopy(self.game_state)
+                    child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
+                    child.game_state.discard_from_hand(c)
+                    
+                    if i not in best_4_indexes:
+                        child.game_state.state = "end_game"
+                        
+                    self.children.append(child)
             else:
                 new_state = deepcopy(self.game_state)
                 child = Node_DLCFR(new_state, self, self.nn_manager, self.predicator)
@@ -78,6 +77,8 @@ class Node_DLCFR:
         phantom_counter = 0
         for i in range(len(hand_cards)):
             if hand_cards[i].isPhantom:
+                if phantom_counter > 1:         
+                    continue
                 hand_cards_one_hot[nn_manager.card_to_value_mapping["Phantom Card"] + phantom_counter] = 1
                 phantom_counter += 1
             else:
