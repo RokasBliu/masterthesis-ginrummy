@@ -33,7 +33,9 @@ class DataGenerator:
                 self.discard_rand_state(rand_game, rand_game.players[rand_game.turn_index])
             
             self.draw_rand_state(rand_game, main_player)
-                
+
+        rand_game.hand_evaluator.get_hand_score(main_player.hand)
+        rand_game.hand_evaluator.get_hand_score(oponent_player.hand)
 
         rand_game_state = GameState(rand_game, "draw", rand_game.bot_manager.known_cards_p1)
         phantom_card_number = random.randint(0, 2)
@@ -62,7 +64,7 @@ class DataGenerator:
         
         else:
             card_drawn = game.discard_pile.pop()
-            card_drawn.just_drew = True
+            #card_drawn.just_drew = True
             player.hand.add(card_drawn)
             game.drawing_from_discard = True
             game.bot_manager.add_known_card(card_drawn, game.turn_index)
@@ -78,24 +80,27 @@ class DataGenerator:
         if card in game.bot_manager.known_cards_p1:
             game.bot_manager.known_cards_p1.remove(card)
 
-        for c in player.hand.cards:
-            c.just_drew = False
+        #for c in player.hand.cards:
+        #    c.just_drew = False
         
         game.turn_index = (game.turn_index + 1) % 2
         if game.turn_index == 0:
             game.turn_number += 1
-            print("Turn number: ", game.turn_number)
+            #print("Turn number: ", game.turn_number)
 
-    def create_data_from_game_state(self, state, stage, player):
+    def create_data_from_game_state(self, state, stage):
         data_array = []
-        data_array.append(player.hand.cards)
+        predicted_outcome, value_array, predicted_score, cards = state.bot_manager.get_action_from_bot(stage, self.bot, state, 8, return_number_value = False, return_array = True)
+        data_array.append(cards)
         data_array.append(state.discard_pile)
-        print(state.discard_pile)
         data_array.append("" if len(state.discard_pile) == 0 else state.discard_pile[-1])
         data_array.append(state.bot_manager.known_cards_p1)
-        predicted_outcome, predicted_score = state.bot_manager.get_action_from_bot(stage, self.bot, state, return_number_value = False)
+        #print("Predicted outcome: ", predicted_outcome)
+        #print("Predicted score: ", predicted_score)
+        #print("Value array: ", value_array)
         data_array.append(predicted_score)
         data_array.append(predicted_outcome)
+        data_array.append(value_array)
 
         return data_array
 
@@ -106,7 +111,7 @@ class DataGenerator:
         print("Known cards: ", state.bot_manager.known_cards_p1)
     
 def main():
-    file_name = "discard-100K-both-values.csv"
+    file_name = "discard-100K-3-values.csv"
     data_gen = DataGenerator()
     try:
         data = pd.read_csv(file_name).reset_index(drop=True, inplace=False).values.tolist()
@@ -117,9 +122,9 @@ def main():
         data = []
     for i in range(data_gen.data_amount):
         game_state = data_gen.create_random_game_state("discard")
-        data.append(data_gen.create_data_from_game_state(game_state, "discard", game_state.players[0]))
-        if i % 1000 == 0:
-            df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction outcome", "Prediction score"])
+        data.append(data_gen.create_data_from_game_state(game_state, "discard"))
+        if i % 100 == 0:
+            df = pd.DataFrame(data, columns=["Player Hand", "Discard Pile", "Top of discard pile", "Known Cards", "Prediction outcome", "Prediction score", "Value array"])
             df.to_csv(file_name)
     # for i in range(data_gen.data_amount):
     #     game = data_gen.create_random_game_state("discard")

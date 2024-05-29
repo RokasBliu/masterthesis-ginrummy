@@ -20,7 +20,7 @@ class SuperSimpleCFR:
         #print("Column to insert: ", column_to_insert)
         self.strategies[column_to_insert] = value
 
-    def resolve(self, state, EndStage, EndDepth, iterations, smallDeck = True, return_number_value = False):
+    def resolve(self, state, EndStage, EndDepth, smallDeck = True, return_number_value = False, return_array = False):
         #Create the node three
         root = Node(state, None)
         root.create_children_tree(root, EndDepth)
@@ -43,12 +43,7 @@ class SuperSimpleCFR:
         #for i in range(iterations):
         self.traverse(root, EndStage, EndDepth)
         #self.strategies = self.update_strategies()
-        print(self.strategies)
-
-        if return_number_value:
-            print("Returning number value")
-            print(self.strategies.max(axis=1)[0])
-            return self.strategies.max(axis=1)[0]
+        #print(self.strategies)
 
         best_strategy = self.strategies.idxmax(axis=1)[0]
         if (self.strategies.at[0, best_strategy] == 0).all():
@@ -59,7 +54,7 @@ class SuperSimpleCFR:
                 random_index = random.randint(0, len(root.children) - 1)
                 best_strategy = self.strategies.columns[random_index]
                 
-        print("Best strategy: ", best_strategy)
+        #print("Best strategy: ", best_strategy)
 
         if stage == "discard":
             for i in range(len(root.game_state.main_player_hand.cards)):
@@ -67,6 +62,19 @@ class SuperSimpleCFR:
                     best_strategy = i + 1
                     break
         
+        if return_number_value:
+            print("Returning number value")
+            print(self.strategies.max(axis=1)[0])
+            return best_strategy, self.strategies.max(axis=1)[0]
+        
+        if return_array:
+            #create array of cards from column names
+            card_array = []
+            for i in range(len(cards)):
+                    if cards[i].just_drew is False:
+                        card_array.append(cards[i])
+
+            return best_strategy, self.strategies.iloc[0].values.tolist(), self.strategies.max(axis=1)[0], card_array
 
         return best_strategy
     
@@ -107,12 +115,6 @@ class SuperSimpleCFR:
                 self.insert_strategy_via_index(utility, i)
 
             return 0
-
-                
-
-    
-    def update_strategies(self):
-        return
 
     #TODO: test if this makes the bot better
     def basyian_update(self, node):

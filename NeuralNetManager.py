@@ -70,34 +70,61 @@ class NeuralNetManager():
         # model.add(LSTM(32, return_sequences=True))
         # model.add(LSTM(8))
         # model.add(Dense(1))
-        model.add(Dense(64, activation='relu', input_shape=(4, self.bits)))
-        #model.add(Dense(64, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(Dense(16, activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(1, activation='linear'))
 
-        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mse'])
+        #model.add(Dense(64, activation='relu', input_shape=(4, self.bits)))
+        #model.add(Dropout(0.2))
+        #model.add(Dense(32, activation='relu'))
+        #model.add(Dropout(0.2))
+        #model.add(Dense(16, activation='relu'))
+        #model.add(Flatten())
+        #model.add(Dense(8, activation='linear'))
+
+        model.add(LSTM(128, input_shape=(4, len(self.one_hot_bits)), return_sequences=True))
+        model.add(LSTM(64, return_sequences=True))
+        model.add(LSTM(32, return_sequences=True))
+        model.add(LSTM(16))
+        model.add(Dense(8, activation='linear'))
+
+        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
+        #model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.summary()
         self.model = model
         
-    def transform_data(self, data="discard-100K-both-values.csv"):
+    def transform_data(self, data="discard-100K-3-values.csv"):
         #Read data from csv
         df = pd.read_csv(data)
         data_list = df.to_numpy()
 
-        training_data = data_list[:, 1:-1]
-        target_data = data_list[:, -2]
+
+        training_data = data_list[:, 1:]
+        target_data = data_list[:, -1]
+        
+        
+        for i in range(len(target_data)):
+            target_data[i] = target_data[i][1:-1].split(", ")
+            for j in range(len(target_data[i])):
+                #float with 2 decimal points
+                target_data[i][j] = round(float(target_data[i][j]), 1)
+        
+        for i in range(len(target_data)):
+            if len(target_data[i]) < 8:
+                target_data[i] = target_data[i] + [0] * (8 - len(target_data[i]))
 
         #Embedding and converting data to numbers
 
+        #print("Training data: ", training_data)
+        #print("Target data: ", target_data.tolist())
         #Hand cards
         hand_cards = training_data[:, 0]
+        hand_cards_sorted = []
+
         for i in range(len(hand_cards)):
             phantom_counter = 0
             hand_cards[i] = hand_cards[i][1:-1].split(", ")
+
+            #sort hand cards by their value
+            #hand_cards_sorted[i] = sorted(hand_cards[i], key=lambda x: self.card_to_value_mapping[x])
+
             hand_cards_one_hot = [0] * self.bits
             for j in range(len(hand_cards[i])):
                 if hand_cards[i][j] == '':
@@ -146,30 +173,40 @@ class NeuralNetManager():
         training_data = []
         for i in range(len(hand_cards)):
             data_to_append = [hand_cards[i]] + [discard_pile[i]] + [top_of_discard_pile[i]] + [known_cards[i]]
+            #print("Data to append:", data_to_append)
             training_data.append(data_to_append)
 
-        draw_phase_training_data = training_data[:int(len(training_data)/2)]
-        discard_phase_training_data = training_data[int(len(training_data)/2):]
-        #print("Discard pile after embedding:", discard_pile)
-        #print("Training data after embedding:", training_data)
 
-        #Split data into training and testing
-        #target_data = target_data.reshape(-1, 1)
-        target_data = target_data.tolist()
-        #print("Target data:", target_data)
-        x_train, x_test, y_train, y_test = train_test_split(training_data, target_data, test_size=0.2, random_state=42)
+        #converted_target_data = []
+
+        #for i in range(len(target_data)):   
+            #target_data_one_hot = [0] * 8
+            #target_data_one_hot[int(target_data[i]) - 1] = 1
+            #converted_target_data.append(target_data_one_hot)
+
+        for i, item in enumerate(target_data[:10]):  # Change 5 to a larger number if necessary
+            print(f"Element {i}: {item}")
+            print(f"Element {i}: length: {len(item)}")
+
+        print("shape of training data: ", np.array(training_data).shape)
+        print("shape of target data: ", np.array(target_data.tolist()).shape)
+        
+        x_train, x_test, y_train, y_test = train_test_split(training_data, target_data.tolist(), test_size=0.2, random_state=42)
         return x_train, x_test, y_train, y_test
 
 def main():
     nn = NeuralNetManager()
     nn.build_neural_net()
     x_train, x_test, y_train, y_test = nn.transform_data()
-    nn.model.fit(x_train, y_train, epochs=100, batch_size=128, validation_data=(x_test, y_test), verbose=1)
+    nn.model.fit(x_train, y_train, epochs=80, batch_size=128, validation_data=(x_test, y_test), verbose=1)
     loss, mse = nn.model.evaluate(x_test, y_test)
     print("Mean squared error: ", mse)
     print("Loss: ", loss)
+
     predictions = nn.model.predict(x_test)
     for i in range(10):
         print("Prediction: ", predictions[i], "Actual: ", y_test[i])
 
-main()
+    #nn.model.save("discard_phase_array_model.h5")
+    #nn.model.save("discard_phase_binary_model.h5")  
+#main()

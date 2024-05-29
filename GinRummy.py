@@ -73,7 +73,7 @@ class GinRummy(object):
             p.melds_in_hand_when_discard = []
 
             #A bit spaghetti, but it works
-            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "CFRKnocking" or p.name == "RandomBot" or p.name == "RandomBot2":
+            if p.name == "CFR" or p.name == "GreedyBot" or p.name == "CFRBaseline" or p.name == "CFRKnocking" or p.name == "RandomBot" or p.name == "RandomBot2" or p.name == "GROCFR" or p.name == "DeepLearningCFR" or p.name == "DLMCCFR":
                 p.is_human = False
 
         self.deck = Deck()
@@ -92,6 +92,7 @@ class GinRummy(object):
         for i in range(num_cards):
             for p in self.players:
                 p.hand.add(self.deck.deal())
+        p.hand.sort_by_rank()
 
     def draw(self, player, in_q):
         answering = False
@@ -123,6 +124,18 @@ class GinRummy(object):
             elif player.name == "GROCFR":
                 start = time.time()
                 answer = self.bot_manager.get_action_from_bot("draw", "GROCFR", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "DeepLearningCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("draw", "DeepLearningCFR", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "DLMCCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("draw", "DLMCCFR", self, player.depth)
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
@@ -184,6 +197,18 @@ class GinRummy(object):
                 end = time.time()
                 time_diff = end - start
                 print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "DeepLearningCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("discard", "DeepLearningCFR", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
+            elif player.name == "DLMCCFR":
+                start = time.time()
+                answer = self.bot_manager.get_action_from_bot("discard", "DLMCCFR", self, player.depth)
+                end = time.time()
+                time_diff = end - start
+                print(f"{player.name} chose {answer} in {time_diff} seconds")
             elif player.name == "RandomBot":
                 answer = self.bot_manager.get_action_from_bot("discard", "RandomBot", self)
             elif player.name == "RandomBot2":
@@ -215,13 +240,15 @@ class GinRummy(object):
             answering = False
             while answering == False:
                 if player.name == "CFRKnocking":
-                    # For now we make that bots knock instantly
-                    #Testing for a knocking algorithm
                     knock_answer = self.bot_manager.get_knocking_action(self, "SuperSimpleCFR")
+                elif player.name == "DeepLearningCFR":
+                    knock_answer = self.bot_manager.get_knocking_action(self, "DeepLearningCFR")
                 elif player.name == "CFRBaseline":
                     knock_answer = self.bot_manager.get_knocking_action(self, "SSCFRBaseline")
                 elif player.name == "GROCFR":
                     knock_answer = self.bot_manager.get_knocking_action(self, "GROCFR")
+                elif player.name == "DLMCCFR":
+                    knock_answer = self.bot_manager.get_knocking_action(self, "DLMCCFR")
                 elif player.name == "GreedyBot" or player.name == "CFR" or player.name == "RandomBot" or player.name == "RandomBot2":
                     knock_answer = "y"
                 else:  
@@ -359,12 +386,12 @@ def main_menu_display(window, clock, FPS, player1_name=["Player 1"], player2_nam
         start_button = Button("Start", 200, 50)
 
         # Dropdown menu
-        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "CFRBaseline", "CFRKnocking", "GROCFR"], 200, 50) #RandomBot and RandomBot2
-        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "CFRBaseline", "CFRKnocking", "GROCFR"], 200, 50)
+        main_menu_dropdown_p1 = DropDownMenu("main_menu_dropdown_p1", ["Player 1", "GreedyBot", "CFR", "DeepLearningCFR", "DLMCCFR"], 200, 50) #RandomBot, RandomBot2 CFRKnocking, CFRBaseline, RandomBot2, GROCFR 
+        main_menu_dropdown_p2 = DropDownMenu("main_menu_dropdown_p2", ["Player 2", "GreedyBot", "CFR", "DeepLearningCFR", "DLMCCFR"], 200, 50)
 
         # Depth dropdown menu
-        main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["8", "10"], 50, 50)
-        main_menu_depth_p2 = DropDownMenu("main_menu_depth_p2", ["8", "10"], 50, 50)
+        main_menu_depth_p1 = DropDownMenu("main_menu_depth_p1", ["6", "8", "10"], 50, 50)
+        main_menu_depth_p2 = DropDownMenu("main_menu_depth_p2", ["6", "8", "10"], 50, 50)
 
         # Main menu loop
         start_game = False
@@ -643,12 +670,13 @@ def main():
     q = Queue() # used for communicating between threads
 
     # Running game logic on a seperate daemon thread
-    game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=True)
+    game.thread = threading.Thread(target=game_thread, args=(game, q, ), daemon=False)
     game.thread.start()
 
     # This main thread will be running the display
     pygame_display(game, q, window, clock, FPS)
     pygame.quit()
+    #game_thread(game, q)
 
 if __name__ == "__main__":
     main()
